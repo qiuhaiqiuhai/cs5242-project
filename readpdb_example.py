@@ -34,8 +34,6 @@ folder_path = "../training_first_100_samples/"
 def gen_file_name(index, type="lig"):
 	return folder_path+"%04d_%s_cg.pdb"%(index, type)
 
-
-
 X_list, Y_list, Z_list, atomtype_list=read_pdb(gen_file_name(1, type="lig"))
 print(X_list)
 print(Y_list)
