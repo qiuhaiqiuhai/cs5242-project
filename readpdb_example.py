@@ -1,4 +1,5 @@
-def read_pdb(filename):
+def read_pdb(index, type="lig"):
+	filename = gen_file_name(index, type)
 
 	with open(filename, 'r') as file:
 		strline_L = file.readlines()
@@ -23,25 +24,30 @@ def read_pdb(filename):
 
 		atomtype = stripped_line[76:78].strip()
 		if atomtype == 'C':
-			atomtype_list.append('h') # 'h' means hydrophobic
+			# atomtype_list.append('h') # 'h' means hydrophobic
+			atomtype_list.append(1)
 		else:
-			atomtype_list.append('p') # 'p' means polar
+			# atomtype_list.append('p') # 'p' means polar
+			atomtype_list.append(-1)
 
-	return X_list, Y_list, Z_list, atomtype_list
+	return {'x':X_list,
+			'y':Y_list,
+			'z':Z_list,
+			'type':atomtype_list}
 
-folder_path = "../training_first_100_samples/"
+folder_path = "../training_data/"
 
 def gen_file_name(index, type="lig"):
 	return folder_path+"%04d_%s_cg.pdb"%(index, type)
 
-X_list, Y_list, Z_list, atomtype_list=read_pdb(gen_file_name(1, type="lig"))
-print(X_list)
-print(Y_list)
-print(Z_list)
-print(atomtype_list)
-
-X_list, Y_list, Z_list, atomtype_list=read_pdb(gen_file_name(1, type="pro"))
-print(X_list)
-print(Y_list)
-print(Z_list)
-print(atomtype_list)
+# X_list, Y_list, Z_list, atomtype_list=read_pdb(62, type="lig")
+# print(X_list)
+# print(Y_list)
+# print(Z_list)
+# print(atomtype_list)
+#
+# X_list, Y_list, Z_list, atomtype_list=read_pdb(62, type="pro")
+# print(X_list)
+# print(Y_list)
+# print(Z_list)
+# print(atomtype_list)
