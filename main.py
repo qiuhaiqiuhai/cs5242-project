@@ -1,9 +1,11 @@
 from models import trial_3Dcnn as test_network
 from keras import optimizers, losses
 from data_reader import read_processed_data
+import CONST
 
+size = CONST.VOXEL.size
 
-input_shape = (18, 18, 18, 4)
+input_shape = (size, size, size, 4)
 train_x, train_y, test_x, test_y, class_name = read_processed_data()
 
 model = test_network(input_shape=input_shape)

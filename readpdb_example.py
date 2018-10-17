@@ -16,7 +16,8 @@ def read_pdb(index, type="lig"):
 		line_length = len(stripped_line)
 		# print("Line length:{}".format(line_length))
 		if line_length != 78:
-			print("ERROR: line length is different. Expected=78, current={}".format(line_length))
+			print("index: %d, ERROR: line length is different. Expected=78, current=%d"%(index, line_length))
+			print(stripped_line)
 
 		X_list.append(float(stripped_line[30:38].strip()))
 		Y_list.append(float(stripped_line[38:46].strip()))
@@ -40,13 +41,13 @@ folder_path = "../training_data/"
 def gen_file_name(index, type="lig"):
 	return folder_path+"%04d_%s_cg.pdb"%(index, type)
 
-# X_list, Y_list, Z_list, atomtype_list=read_pdb(62, type="lig")
+# X_list, Y_list, Z_list, atomtype_list=read_pdb(129, type="lig")
 # print(X_list)
 # print(Y_list)
 # print(Z_list)
 # print(atomtype_list)
 #
-# X_list, Y_list, Z_list, atomtype_list=read_pdb(62, type="pro")
+# X_list, Y_list, Z_list, atomtype_list=read_pdb(129, type="pro")
 # print(X_list)
 # print(Y_list)
 # print(Z_list)

@@ -3,31 +3,37 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import readpdb_example as readpdb
+import CONST
 
 data_index = 1
 
-def data_preprocess_bind(data_index, size = 18, step = 1):
+def data_preprocess_bind(data_index):
     pro = readpdb.read_pdb(data_index, 'pro')
     lig = readpdb.read_pdb(data_index, 'lig')
 
-    voxel, neighbor_count = fill_voxel(pro, lig, size=18, step=1)
+    voxel, neighbor_count = fill_voxel(pro, lig)
     print('index: %d, atom count: %d'%(data_index, neighbor_count))
     np.save('../preprocessed_data/%04d'%data_index,voxel)
 
-def data_preprocess_unbind(data_index, size = 18, step = 1):
-    pro = readpdb.read_pdb(data_index, 'pro')
+def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
+    count = 0
+    lig = readpdb.read_pdb(data_index, 'lig')
 
-    for i in range(data_index+1, 1000):
-        lig = readpdb.read_pdb(i, 'lig')
+    for i in range(1, 3001):
+        if(i==data_index):
+            continue
+        pro = readpdb.read_pdb(i, 'pro')
 
-        voxel, neighbor_count = fill_voxel(pro, lig, size = 18, step = 1)
+        voxel, neighbor_count = fill_voxel(pro, lig)
 
         if(neighbor_count>0):
+            count += 1
             print('index: %d, atom count: %d'%(data_index, neighbor_count))
-            np.save('../preprocessed_data/%04d_unbind'%data_index,voxel)
-            break
+            np.save('../preprocessed_data/%04d_unbind_%02d'%(data_index, count),voxel)
+            if(count == unbind_count):
+                break
 
-def fill_voxel(pro, lig, size = 18, step = 1):
+def fill_voxel(pro, lig, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
     pro_zip = list(zip(pro['x'], pro['y'], pro['z'], pro['type']))
     lig_zip = list(zip(lig['x'], lig['y'], lig['z'], lig['type']))
 
@@ -84,21 +90,23 @@ def fill_voxel(pro, lig, size = 18, step = 1):
                     atom_recenter[1] / step - y1) * abs(
                     atom_recenter[2] / step - z1) * atom_recenter[3]
 
-        # h_list = [i for i, x in enumerate(origin_type) if x == 1]
-        # p_list = [i for i, x in enumerate(origin_type) if x == -1]
+    #     h_list = [i for i, x in enumerate(origin_type) if x == 1]
+    #     p_list = [i for i, x in enumerate(origin_type) if x == -1]
+    #
+    #     for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
+    #         xs = [origin_x[i] for i in mors]
+    #         ys = [origin_y[i] for i in mors]
+    #         zs = [origin_z[i] for i in mors]
+    #
+    #         ax.scatter(xs, ys, zs, c=c, marker=m, alpha=ca)
+    #
+    # plt.show()
 
-        # for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
-        #     xs = [origin_x[i] for i in mors]
-        #     ys = [origin_y[i] for i in mors]
-        #     zs = [origin_z[i] for i in mors]
-        #
-        #     ax.scatter(xs, ys, zs, c=c, marker=m, alpha=ca)
+    return voxel, neighbor_count
 
-        return voxel, neighbor_count
+# data_preprocess_unbind(127)
 
-for data_index in range(1, 101):
+for data_index in range(1, CONST.DATA.processed_amount+1):
     data_preprocess_bind(data_index)
     data_preprocess_unbind(data_index)
 
-
-# plt.show()
