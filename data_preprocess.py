@@ -2,6 +2,7 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import shutil, os
 import readpdb_example as readpdb
 
 data_index = 1
@@ -10,22 +11,27 @@ def data_preprocess_bind(data_index, size = 18, step = 1):
     pro = readpdb.read_pdb(data_index, 'pro')
     lig = readpdb.read_pdb(data_index, 'lig')
 
-    voxel, neighbor_count = fill_voxel(pro, lig, size=18, step=1)
-    print('index: %d, atom count: %d'%(data_index, neighbor_count))
+    voxel, neighbor_count = fill_voxel(pro, lig, size=size, step=step)
+    # print('index: %d, atom count: %d'%(data_index, neighbor_count))
     np.save('../preprocessed_data/%04d'%data_index,voxel)
 
-def data_preprocess_unbind(data_index, size = 18, step = 1):
+def data_preprocess_unbind(data_index, min_index, max_index, n_unbind, size = 18, step = 1):
     pro = readpdb.read_pdb(data_index, 'pro')
-
-    for i in range(data_index+1, 1000):
+    have_neighbor_count = 0
+    for i in range(min_index, max_index):
+        if data_index == i:
+            continue
         lig = readpdb.read_pdb(i, 'lig')
 
-        voxel, neighbor_count = fill_voxel(pro, lig, size = 18, step = 1)
+        voxel, neighbor_count = fill_voxel(pro, lig, size = size, step = step)
 
-        if(neighbor_count>0):
-            print('index: %d, atom count: %d'%(data_index, neighbor_count))
-            np.save('../preprocessed_data/%04d_unbind'%data_index,voxel)
+        if have_neighbor_count == n_unbind:
             break
+        elif(neighbor_count>0):
+            # print('index: %d, atom count: %d'%(data_index, neighbor_count))
+            have_neighbor_count += 1
+            np.save('../preprocessed_data/%04d_unbind_%d' % (data_index, have_neighbor_count), voxel)
+
 
 def fill_voxel(pro, lig, size = 18, step = 1):
     pro_zip = list(zip(pro['x'], pro['y'], pro['z'], pro['type']))
@@ -96,9 +102,13 @@ def fill_voxel(pro, lig, size = 18, step = 1):
 
         return voxel, neighbor_count
 
-for data_index in range(1, 101):
-    data_preprocess_bind(data_index)
-    data_preprocess_unbind(data_index)
+def preprocess(min_index, max_index, n_unbind, size, step):
+    # recreate folder
+    shutil.rmtree('../preprocessed_data/')
+    os.makedirs('../preprocessed_data/')
+    for data_index in range(min_index, max_index):
+        data_preprocess_bind(data_index, size=size, step=step)
+        data_preprocess_unbind(data_index,min_index,max_index,n_unbind, size=size, step=step)
 
 
 # plt.show()
