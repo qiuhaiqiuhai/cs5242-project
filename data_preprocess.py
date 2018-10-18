@@ -116,5 +116,5 @@ def preprocess(min_index, max_index, n_unbind, size, step):
 # plt.show()
 shutil.rmtree('../preprocessed_data/')
 os.makedirs('../preprocessed_data/')
-for n_unbind in range(1, 2):
-    preprocess(1, 201, n_unbind, size=21, step=0.5)
+for n_unbind in range(1, 5):
+    preprocess(1, 3001, n_unbind, size=18, step=1)
