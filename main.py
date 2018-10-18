@@ -1,4 +1,4 @@
-from models import trial_3Dcnn as test_network
+from models import trial_3Dcnn as test0_network
 from models import test1_3Dcnn as test1_network
 from models import test2_3Dcnn as test2_network
 from models import test3_3Dcnn as test3_network
@@ -15,6 +15,7 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(sys.stdout)
     ])
+logger = logging.getLogger('main')
 date = datetime.datetime
 folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
 dir = 'results/%s/'%folder_name
@@ -29,24 +30,35 @@ min_index = 1
 max_index = 3001
 n_unbind = 1
 
-logger = logging.getLogger('main')
-logger.info("box size is {0}".format(size))
-logger.info("step is {0}".format(step))
-logger.info("epochs is {0}".format(epochs))
-logger.info("process from index {0} to {1}".format(min_index, max_index))
-logger.info("max number of unbind pairs is {0}".format(n_unbind))
-
-train_x, train_y, class_name = read_processed_data(min_index, max_index, n_unbind)
-train_x, train_y = shuffle(train_x, train_y)
-
-model_name = 'test1'
-model = test3_network(input_shape=input_shape)
+# define models
+model_names = ['test0', 'test1', 'test2', 'test3']
+models = []
+models.append(test0_network(input_shape=input_shape))
+models.append(test1_network(input_shape=input_shape))
+models.append(test2_network(input_shape=input_shape))
+models.append(test3_network(input_shape=input_shape))
 optimizer = optimizers.adadelta()
-model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-print (model.summary())
+for n_unbind in range(1, 5):
+	for i in range(len(models)):
+		model_name = model_names[i]
+		model = models[i]
 
-h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=1, validation_split=0.2)
+		logger.info("model is {0}".format(model_name))
+		logger.info("box size is {0}".format(size))
+		logger.info("step is {0}".format(step))
+		logger.info("epochs is {0}".format(epochs))
+		logger.info("process from index {0} to {1}".format(min_index, max_index))
+		logger.info("max number of unbind pairs is {0}".format(n_unbind))
 
-np.savetxt(os.path.join(dir,'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.txt'%(size,step,epochs,n_unbind,model_name)),\
-           np.transpose([h.history['acc'], h.history['loss'], h.history['val_acc'], h.history['val_loss']]))
+		print (model.summary())
+
+		train_x, train_y, class_name = read_processed_data(min_index, max_index, n_unbind)
+		train_x, train_y = shuffle(train_x, train_y)
+
+		model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+
+		h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_split=0.2)
+
+		np.savetxt(os.path.join(dir,'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.txt'%(size,step,epochs,n_unbind,model_name)),\
+		           np.transpose([h.history['acc'], h.history['loss'], h.history['val_acc'], h.history['val_loss']]))
