@@ -43,5 +43,5 @@ folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
 dir = 'results/%s/'%folder_name
 if not os.path.exists(dir):
     os.makedirs(dir)
-np.savetxt(os.path.join(dir,'results/box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.txt'%(size,step,epochs,n_unbind,model_name)),\
+np.savetxt(os.path.join(dir,'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.txt'%(size,step,epochs,n_unbind,model_name)),\
            np.transpose([h.history['acc'], h.history['loss'], h.history['val_acc'], h.history['val_loss']]))
