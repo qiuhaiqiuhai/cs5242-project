@@ -7,13 +7,13 @@ import readpdb_example as readpdb
 
 data_index = 1
 
-def data_preprocess_bind(data_index, size = 18, step = 1):
+def data_preprocess_bind(data_index, n_unbind, size = 18, step = 1):
     pro = readpdb.read_pdb(data_index, 'pro')
     lig = readpdb.read_pdb(data_index, 'lig')
 
     voxel, neighbor_count = fill_voxel(pro, lig, size=size, step=step)
     # print('index: %d, atom count: %d'%(data_index, neighbor_count))
-    np.save('../preprocessed_data/%04d'%data_index,voxel)
+    np.save('../preprocessed_data/%d_unbind/%04d'%(n_unbind,data_index),voxel)
 
 def data_preprocess_unbind(data_index, min_index, max_index, n_unbind, size = 18, step = 1):
     pro = readpdb.read_pdb(data_index, 'pro')
@@ -30,7 +30,7 @@ def data_preprocess_unbind(data_index, min_index, max_index, n_unbind, size = 18
         elif(neighbor_count>0):
             # print('index: %d, atom count: %d'%(data_index, neighbor_count))
             have_neighbor_count += 1
-            np.save('../preprocessed_data/%04d_unbind_%d' % (data_index, have_neighbor_count), voxel)
+            np.save('../preprocessed_data/%d_unbind/%04d_unbind_%d' % (n_unbind,data_index,have_neighbor_count), voxel)
 
 
 def fill_voxel(pro, lig, size = 18, step = 1):
@@ -104,11 +104,17 @@ def fill_voxel(pro, lig, size = 18, step = 1):
 
 def preprocess(min_index, max_index, n_unbind, size, step):
     # recreate folder
-    shutil.rmtree('../preprocessed_data/')
-    os.makedirs('../preprocessed_data/')
+    path = '../preprocessed_data/%d_unbind/'%n_unbind
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    os.makedirs(path)
     for data_index in range(min_index, max_index):
-        data_preprocess_bind(data_index, size=size, step=step)
+        data_preprocess_bind(data_index,n_unbind,size=size, step=step)
         data_preprocess_unbind(data_index,min_index,max_index,n_unbind, size=size, step=step)
 
 
 # plt.show()
+shutil.rmtree('../preprocessed_data/')
+os.makedirs('../preprocessed_data/')
+for n_unbind in range(1, 2):
+    preprocess(1, 201, n_unbind, size=21, step=0.5)
