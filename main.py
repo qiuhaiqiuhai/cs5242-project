@@ -13,6 +13,9 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(sys.stdout)
     ])
+date = datetime.datetime
+folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
+dir = 'results/%s/'%folder_name
 
 size = 18
 step = 1
@@ -28,6 +31,7 @@ logger.info("step is {0}".format(step))
 logger.info("epochs is {0}".format(epochs))
 logger.info("process from index {0} to {1}".format(min_index, max_index))
 logger.info("max number of unbind pairs is {0}".format(n_unbind))
+logger.info("add dilation rate to model")
 
 train_x, train_y, class_name = read_processed_data(min_index, max_index, n_unbind)
 train_x, train_y = shuffle(train_x, train_y)
@@ -38,9 +42,6 @@ optimizer = optimizers.adadelta()
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=1, validation_split=0.2)
 
-date = datetime.datetime
-folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
-dir = 'results/%s/'%folder_name
 if not os.path.exists(dir):
     os.makedirs(dir)
 np.savetxt(os.path.join(dir,'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.txt'%(size,step,epochs,n_unbind,model_name)),\

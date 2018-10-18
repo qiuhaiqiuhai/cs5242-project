@@ -32,7 +32,28 @@ def trial_3Dcnn(input_shape=(18, 18, 18, 4), class_num=2):
 
 def test1_3Dcnn(input_shape=(18, 18, 18, 4), class_num=2):
     model = Sequential()
-    model.add(Conv3D(64, input_shape=input_shape,kernel_size=(3, 3, 3), activation='relu'))
+    model.add(Conv3D(64, input_shape=input_shape,kernel_size=(3, 3, 3), activation='relu', dilation_rate = 2))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Conv3D(128, kernel_size=(2, 2, 2), activation='relu'),dilation_rate = 2)
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Conv3D(256,kernel_size=(1, 1, 1), activation='relu'),dilation_rate = 2)
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Flatten())
+    model.add(Dense(1000, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(500, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(200, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(class_num, activation='softmax'))
+
+    return model
+
+def test2_3Dcnn(input_shape=(18, 18, 18, 4), class_num=2):
+    model = Sequential()
+    model.add(Conv3D(32, input_shape=input_shape,kernel_size=(3, 3, 3), activation='relu'))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Conv3D(64, kernel_size=(3, 3, 3), activation='relu'))
     model.add(MaxPool3D(pool_size=(2, 2, 2)))
     model.add(Conv3D(128, kernel_size=(2, 2, 2), activation='relu'))
     model.add(MaxPool3D(pool_size=(2, 2, 2)))
