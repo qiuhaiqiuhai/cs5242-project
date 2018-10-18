@@ -6,7 +6,7 @@ import CONST
 size = CONST.VOXEL.size
 
 input_shape = (size, size, size, 4)
-train_x, train_y, test_x, test_y, class_name = read_processed_data()
+train_x, train_y, class_name = read_processed_data()
 
 model = test_network(input_shape=input_shape)
 optimizer = optimizers.adadelta()

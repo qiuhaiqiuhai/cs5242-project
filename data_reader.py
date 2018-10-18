@@ -28,6 +28,6 @@ def read_processed_data():
 
 
 
-    return np.stack(train_x, 0), to_categorical(np.array(train_y)), np.stack(train_x, 0), to_categorical(np.array(train_y)), class_name
+    return np.stack(train_x, 0), to_categorical(np.array(train_y)), class_name
 
 # read_processed_data()
