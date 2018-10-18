@@ -30,7 +30,7 @@ __gcloud compute scp cs5242:/home/xiaogouman/... {local_dir} --zone us-east1-c__
 
 3. jupyter notebook  
 -> on local, connect to remote jupyter(make sure the ~/.ssh/google_compute_engine exists)  
-__ssh -i ~/.ssh/google_compute_engine -L 8899:localhost:8888 xiaogouman@104.196.170.68__  
+__ssh -i ~/.ssh/google_compute_engine -L 8899:localhost:8888 xiaogouman@35.190.181.16__  
 
 -> on remote, open jupyter notebook  
 __jupyter notebook__  
