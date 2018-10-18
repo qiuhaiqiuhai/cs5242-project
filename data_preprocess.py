@@ -11,9 +11,10 @@ def data_preprocess_bind(data_index):
     pro = readpdb.read_pdb(data_index, 'pro')
     lig = readpdb.read_pdb(data_index, 'lig')
 
-    voxel, neighbor_count = fill_voxel(pro, lig)
-    print('index: %d, atom count: %d'%(data_index, neighbor_count))
-    np.save('../preprocessed_data/%04d'%data_index,voxel)
+    for lig_atom in range(min(CONST.DATA.lig_data_max, len(lig['x']))):
+        voxel, neighbor_count = fill_voxel(pro, lig, lig_atom)
+        print('index: %d, lig_atom: %d, atom count: %d'%(data_index, lig_atom, neighbor_count))
+        np.save('../preprocessed_data/%04d_bind_%02d'%(data_index, lig_atom+1),voxel)
 
 def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
     count = 0
@@ -28,16 +29,16 @@ def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
 
         if(neighbor_count>0):
             count += 1
-            print('index: %d, atom count: %d'%(data_index, neighbor_count))
+            print('index: %d, unbind: %d, atom count: %d'%(data_index, i, neighbor_count))
             np.save('../preprocessed_data/%04d_unbind_%02d'%(data_index, count),voxel)
             if(count == unbind_count):
                 break
 
-def fill_voxel(pro, lig, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
     pro_zip = list(zip(pro['x'], pro['y'], pro['z'], pro['type']))
     lig_zip = list(zip(lig['x'], lig['y'], lig['z'], lig['type']))
 
-    center = lig_zip[0]
+    center = lig_zip[lig_atom]
     voxel = np.zeros((size, size, size, 4))
     neighbor_count = 0
 
@@ -107,6 +108,6 @@ def fill_voxel(pro, lig, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
 # data_preprocess_unbind(127)
 
 for data_index in range(1, CONST.DATA.processed_amount+1):
-    data_preprocess_bind(data_index)
+    # data_preprocess_bind(data_index)
     data_preprocess_unbind(data_index)
 
