@@ -16,7 +16,7 @@ logging.basicConfig(
 
 size = 18
 step = 1
-epochs = 1
+epochs = 20
 input_shape = (size, size, size, 4)
 min_index = 1
 max_index = 3001
