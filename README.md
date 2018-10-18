@@ -4,6 +4,11 @@
 2. run data_preprocess.py
 3. run main.py
 
+# update with branch shuman-1
+1. go to cs5242-project
+2. activate environment: $ env
+3. if need to preprocess data, specify the parameters and: $ process
+4. $ train
 
 
 __google cloud commands__  
