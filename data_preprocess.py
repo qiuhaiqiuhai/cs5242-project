@@ -1,11 +1,15 @@
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+# from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import matplotlib.pyplot as plt
 import numpy as np
 import math
 import readpdb_example as readpdb
 import CONST
+import os
 
 data_index = 1
+directory = '../preprocessed_data/'
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 def data_preprocess_bind(data_index):
     pro = readpdb.read_pdb(data_index, 'pro')
@@ -106,8 +110,7 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
     return voxel, neighbor_count
 
 # data_preprocess_unbind(127)
-
 for data_index in range(1, CONST.DATA.processed_amount+1):
-    # data_preprocess_bind(data_index)
+    data_preprocess_bind(data_index)
     data_preprocess_unbind(data_index)
 
