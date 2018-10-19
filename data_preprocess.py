@@ -1,11 +1,15 @@
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+# from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import matplotlib.pyplot as plt
 import numpy as np
 import math
 import readpdb_example as readpdb
 import CONST
+import os
 
 data_index = 1
+directory = '../preprocessed_data/'
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 def data_preprocess_bind(data_index):
     pro = readpdb.read_pdb(data_index, 'pro')
@@ -43,11 +47,11 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
     voxel = np.zeros((size, size, size, 4))
     neighbor_count = 0
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
 
     for ch, cp, ca, atoms in [('m', 'g', 0.5, pro_zip), ('r', 'b', 1.0, lig_zip)]:
-        origin_x, origin_y, origin_z, origin_type = [], [], [], []
+        # origin_x, origin_y, origin_z, origin_type = [], [], [], []
 
         for atom in atoms:
             if (abs(atom[0] - center[0]) < size//2 * step
@@ -58,10 +62,10 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
                                  atom[1] - center[1],
                                  atom[2] - center[2], atom[3]]
 
-                origin_x.append(atom_recenter[0])
-                origin_y.append(atom_recenter[1])
-                origin_z.append(atom_recenter[2])
-                origin_type.append(atom_recenter[3])
+                # origin_x.append(atom_recenter[0])
+                # origin_y.append(atom_recenter[1])
+                # origin_z.append(atom_recenter[2])
+                # origin_type.append(atom_recenter[3])
 
                 x1 = math.floor(atom_recenter[0] / step); x2 = x1+1
                 y1 = math.floor(atom_recenter[1] / step); y2 = y1+1
@@ -94,23 +98,25 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
                     atom_recenter[1] / step - y1) * abs(
                     atom_recenter[2] / step - z1) * atom_recenter[3]
 
-        h_list = [i for i, x in enumerate(origin_type) if x == 1]
-        p_list = [i for i, x in enumerate(origin_type) if x == -1]
+        # h_list = [i for i, x in enumerate(origin_type) if x == 1]
+        # p_list = [i for i, x in enumerate(origin_type) if x == -1]
 
-        for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
-            xs = [origin_x[i] for i in mors]
-            ys = [origin_y[i] for i in mors]
-            zs = [origin_z[i] for i in mors]
-
-            ax.scatter(xs, ys, zs, c=c, marker=m, alpha=ca)
-
-    plt.show()
+    #     for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
+    #         xs = [origin_x[i] for i in mors]
+    #         ys = [origin_y[i] for i in mors]
+    #         zs = [origin_z[i] for i in mors]
+    #
+    #         ax.scatter(xs, ys, zs, c=c, marker=m, alpha=ca)
+    #
+    #
+    # plt.show()
 
     return voxel, neighbor_count
 
-data_preprocess_bind(1)
+# data_preprocess_bind(1)
+
 
 # atom_count = []
-# for data_index in range(1, CONST.DATA.processed_amount+1):
-#     data_preprocess_bind(data_index)
-#     # data_preprocess_unbind(data_index)
+for data_index in range(1, CONST.DATA.processed_amount+1):
+    data_preprocess_bind(data_index)
+    data_preprocess_unbind(data_index)
