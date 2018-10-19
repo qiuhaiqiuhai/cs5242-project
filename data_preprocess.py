@@ -80,28 +80,29 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
                 bias = size//2
 
                 voxel[x1+bias, y1+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
-                    atom_recenter[1] / step - y2) * abs(atom_recenter[2] / step - z2) * atom_recenter[3]
+                    atom_recenter[1] / step - y2) * abs(
+                    atom_recenter[2] / step - z2)
                 voxel[x1+bias, y1+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y2) * abs(
-                    atom_recenter[2] / step - z1) * atom_recenter[3]
+                    atom_recenter[2] / step - z1)
                 voxel[x1+bias, y2+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y1) * abs(
-                    atom_recenter[2] / step - z2) * atom_recenter[3]
+                    atom_recenter[2] / step - z2)
                 voxel[x2+bias, y1+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y2) * abs(
-                    atom_recenter[2] / step - z2) * atom_recenter[3]
+                    atom_recenter[2] / step - z2)
                 voxel[x1+bias, y2+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y1) * abs(
-                    atom_recenter[2] / step - z1) * atom_recenter[3]
+                    atom_recenter[2] / step - z1)
                 voxel[x2+bias, y2+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y1) * abs(
-                    atom_recenter[2] / step - z2) * atom_recenter[3]
+                    atom_recenter[2] / step - z2)
                 voxel[x2+bias, y1+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y2) * abs(
-                    atom_recenter[2] / step - z1) * atom_recenter[3]
+                    atom_recenter[2] / step - z1)
                 voxel[x2+bias, y2+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y1) * abs(
-                    atom_recenter[2] / step - z1) * atom_recenter[3]
+                    atom_recenter[2] / step - z1)
 
         # h_list = [i for i, x in enumerate(origin_type) if x == 1]
         # p_list = [i for i, x in enumerate(origin_type) if x == -1]
