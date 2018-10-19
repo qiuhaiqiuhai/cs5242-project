@@ -14,6 +14,7 @@ def data_preprocess_bind(data_index):
     for lig_atom in range(min(CONST.DATA.lig_data_max, len(lig['x']))):
         voxel, neighbor_count = fill_voxel(pro, lig, lig_atom)
         print('index: %d, lig_atom: %d, atom count: %d'%(data_index, lig_atom, neighbor_count))
+        # atom_count.append(neighbor_count)
         np.save('../preprocessed_data/%04d_bind_%02d'%(data_index, lig_atom+1),voxel)
 
 def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
@@ -42,72 +43,74 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
     voxel = np.zeros((size, size, size, 4))
     neighbor_count = 0
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
     for ch, cp, ca, atoms in [('m', 'g', 0.5, pro_zip), ('r', 'b', 1.0, lig_zip)]:
-        # origin_x, origin_y, origin_z, origin_type = [], [], [], []
+        origin_x, origin_y, origin_z, origin_type = [], [], [], []
 
         for atom in atoms:
-            if (abs(atom[0] - center[0]) < size * step / 2
-                    and abs(atom[1] - center[1]) < size * step / 2
-                    and abs(atom[2] - center[2]) < size * step / 2):
+            if (abs(atom[0] - center[0]) < size//2 * step
+                    and abs(atom[1] - center[1]) < size//2 * step
+                    and abs(atom[2] - center[2]) < size//2 * step):
                 neighbor_count += (ch == 'm') * 1
                 atom_recenter = [atom[0] - center[0],
                                  atom[1] - center[1],
                                  atom[2] - center[2], atom[3]]
 
-                # origin_x.append(atom_recenter[0])
-                # origin_y.append(atom_recenter[1])
-                # origin_z.append(atom_recenter[2])
-                # origin_type.append(atom_recenter[3])
+                origin_x.append(atom_recenter[0])
+                origin_y.append(atom_recenter[1])
+                origin_z.append(atom_recenter[2])
+                origin_type.append(atom_recenter[3])
 
-                x1, x2 = math.floor(atom_recenter[0] / step), math.ceil(atom_recenter[0] / step)
-                y1, y2 = math.floor(atom_recenter[1] / step), math.ceil(atom_recenter[1] / step)
-                z1, z2 = math.floor(atom_recenter[2] / step), math.ceil(atom_recenter[2] / step)
+                x1 = math.floor(atom_recenter[0] / step); x2 = x1+1
+                y1 = math.floor(atom_recenter[1] / step); y2 = y1+1
+                z1 = math.floor(atom_recenter[2] / step); z2 = z1+1
                 channel = (atom[3] == 1) * 2 + (ch == 'r')
 
-                voxel[x1, y1, z1, channel] += abs(atom_recenter[0] / step - x2) * abs(
+                bias = size//2
+
+                voxel[x1+bias, y1+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y2) * abs(atom_recenter[2] / step - z2) * atom_recenter[3]
-                voxel[x1, y1, z2, channel] += abs(atom_recenter[0] / step - x2) * abs(
+                voxel[x1+bias, y1+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y2) * abs(
                     atom_recenter[2] / step - z1) * atom_recenter[3]
-                voxel[x1, y2, z1, channel] += abs(atom_recenter[0] / step - x2) * abs(
+                voxel[x1+bias, y2+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y1) * abs(
                     atom_recenter[2] / step - z2) * atom_recenter[3]
-                voxel[x2, y1, z1, channel] += abs(atom_recenter[0] / step - x1) * abs(
+                voxel[x2+bias, y1+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y2) * abs(
                     atom_recenter[2] / step - z2) * atom_recenter[3]
-                voxel[x1, y2, z2, channel] += abs(atom_recenter[0] / step - x2) * abs(
+                voxel[x1+bias, y2+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
                     atom_recenter[1] / step - y1) * abs(
                     atom_recenter[2] / step - z1) * atom_recenter[3]
-                voxel[x2, y2, z1, channel] += abs(atom_recenter[0] / step - x1) * abs(
+                voxel[x2+bias, y2+bias, z1+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y1) * abs(
                     atom_recenter[2] / step - z2) * atom_recenter[3]
-                voxel[x2, y1, z2, channel] += abs(atom_recenter[0] / step - x1) * abs(
+                voxel[x2+bias, y1+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y2) * abs(
                     atom_recenter[2] / step - z1) * atom_recenter[3]
-                voxel[x2, y2, z2, channel] += abs(atom_recenter[0] / step - x1) * abs(
+                voxel[x2+bias, y2+bias, z2+bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
                     atom_recenter[1] / step - y1) * abs(
                     atom_recenter[2] / step - z1) * atom_recenter[3]
 
-    #     h_list = [i for i, x in enumerate(origin_type) if x == 1]
-    #     p_list = [i for i, x in enumerate(origin_type) if x == -1]
-    #
-    #     for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
-    #         xs = [origin_x[i] for i in mors]
-    #         ys = [origin_y[i] for i in mors]
-    #         zs = [origin_z[i] for i in mors]
-    #
-    #         ax.scatter(xs, ys, zs, c=c, marker=m, alpha=ca)
-    #
-    # plt.show()
+        h_list = [i for i, x in enumerate(origin_type) if x == 1]
+        p_list = [i for i, x in enumerate(origin_type) if x == -1]
+
+        for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
+            xs = [origin_x[i] for i in mors]
+            ys = [origin_y[i] for i in mors]
+            zs = [origin_z[i] for i in mors]
+
+            ax.scatter(xs, ys, zs, c=c, marker=m, alpha=ca)
+
+    plt.show()
 
     return voxel, neighbor_count
 
-# data_preprocess_unbind(127)
+data_preprocess_bind(1)
 
-for data_index in range(1, CONST.DATA.processed_amount+1):
-    # data_preprocess_bind(data_index)
-    data_preprocess_unbind(data_index)
-
+# atom_count = []
+# for data_index in range(1, CONST.DATA.processed_amount+1):
+#     data_preprocess_bind(data_index)
+#     # data_preprocess_unbind(data_index)

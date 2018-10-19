@@ -15,9 +15,9 @@ def read_pdb(index, type="lig"):
 
 		line_length = len(stripped_line)
 		# print("Line length:{}".format(line_length))
-		if line_length != 78:
-			print("index: %d, ERROR: line length is different. Expected=78, current=%d"%(index, line_length))
-			print(stripped_line)
+		# if line_length != 78:
+		# 	print("index: %d, ERROR: line length is different. Expected=78, current=%d"%(index, line_length))
+		# 	print(stripped_line)
 
 		X_list.append(float(stripped_line[30:38].strip()))
 		Y_list.append(float(stripped_line[38:46].strip()))
