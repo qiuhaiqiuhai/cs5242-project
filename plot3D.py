@@ -84,5 +84,5 @@ def plot_voxel(voxel):
 # lig = read_pdb('../testing_data_release/testing_data/0004_lig_cg.pdb')
 # plot_atoms(pro, lig)
 
-voxel = np.load('../preprocessed_data/0001_bind_01.npy')
-plot_voxel(voxel)
+# voxel = np.load('../preprocessed_data/0001_bind_01.npy')
+# plot_voxel(voxel)

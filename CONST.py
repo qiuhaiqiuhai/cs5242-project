@@ -6,4 +6,9 @@ class VOXEL:
 class DATA:
     unbind_count = 2 # For one ligand, there are how many unbind processed data
     processed_amount = 100
-    lig_data_max = 2;
+    lig_data_max = 10;
+
+class DIR:
+    preprocess_base = '../preprocessed_data/'
+    bind_data = '../preprocessed_data/bind_data'
+    unbind_data = '../preprocessed_data/unbind_data'
