@@ -40,7 +40,7 @@ models.append(test2_network(input_shape=input_shape))
 models.append(test3_network(input_shape=input_shape))
 optimizer = optimizers.adadelta()
 
-for scale in [1, 4, 8]:
+for scale in [1, 5]:
 	n_unbind = math.floor(n_bind * scale)
 	for i in [0, 3]:
 		model_name = model_names[i]
