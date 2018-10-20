@@ -5,7 +5,7 @@ class VOXEL:
 
 class DATA:
     unbind_count = 5 # For one ligand atom, there are how many unbind processed data
-    processed_amount = 10
+    processed_amount = 3000
 
 
 
