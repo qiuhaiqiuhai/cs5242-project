@@ -11,29 +11,26 @@ import plot3D
 file_dir_bind = "../preprocessed_data/%04d_bind_%02d.npy"
 file_dir_unbind = "../preprocessed_data/%04d_unbind_%02d.npy"
 
-def read_processed_data(bind_count, unbind_count):
+def read_processed_data(bind_count = None, unbind_count = None):
     train_x = [] ; train_y = []
     class_name = ['bind', 'unbind']
 
-    bind_data = np.load(CONST.DIR.bind_data + '.npy')
-    print(class_name[0] + ' total:' + str(bind_data.shape[0]) + ' take:' + str(bind_count))
-    bind_data = bind_data[:bind_count]
+    bind_data_origin = np.load(CONST.DIR.bind_data + '.npy')
+    bind_data = bind_data_origin[:bind_count]
+    print(class_name[0] + ' total:' + str(bind_data_origin.shape[0]) + ' take:' + str(len(bind_data)))
 
-    unbind_data = np.load(CONST.DIR.unbind_data + '.npy')
-    print(class_name[1] + ' total:' + str(unbind_data.shape[0]) + ' take:' + str(unbind_count))
-    unbind_data = unbind_data[:unbind_count]
-    # for cat_num, file_dir, max in [(0, file_dir_bind, CONST.DATA.lig_data_max), (1, file_dir_unbind, unbind_count)]:
-    #     count = 0
-    #     for i in range(0, CONST.DATA.processed_amount):
-    #         for j in range(0, max):
-    #             try:
-    #                 train_x.append(np.load(file_dir%(i+1, j+1)))
-    #                 train_y.append(cat_num)
-    #                 count+=1
-    #             except FileNotFoundError:
-    #                 break
-    #     print(class_name[cat_num] + ':' + str(count))
+    unbind_data_origin = None
+    for i in range(CONST.DATA.unbind_count):
+        unbind_data_sub = np.load(CONST.DIR.unbind_data% (i + 1) + '.npy')
+        print(CONST.DIR.unbind_data% (i + 1) + ' total:' + str(unbind_data_sub.shape[0]) )
+        if(unbind_data_origin is None):
+            unbind_data_origin = unbind_data_sub
+        else:
+            unbind_data_origin = np.append(unbind_data_origin, unbind_data_sub, axis=0)
+    unbind_data = unbind_data_origin[:unbind_count]
+    print(class_name[0] + ' total:' + str(unbind_data_origin.shape[0]) + ' take:' + str(len(unbind_data)))
 
-    return np.append(bind_data, unbind_data, axis=0), to_categorical(np.append(np.zeros(bind_count), np.ones(unbind_count),axis=0)), class_name
 
-# read_processed_data(5, 10)
+    return np.append(bind_data, unbind_data, axis=0), to_categorical(np.append(np.zeros(len(bind_data)), np.ones(len(unbind_data)),axis=0)), class_name
+
+# read_processed_data()

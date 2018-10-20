@@ -14,7 +14,7 @@ def data_preprocess_bind(data_index):
     pro = readpdb.read_pdb(data_index, 'pro')
     lig = readpdb.read_pdb(data_index, 'lig')
 
-    for lig_atom in range(min(CONST.DATA.lig_data_max, len(lig['x']))):
+    for lig_atom in range(len(lig['x'])):
         voxel, neighbor_count = fill_voxel(pro, lig, lig_atom)
         print('index: %d, lig_atom: %d, atom count: %d'%(data_index, lig_atom, neighbor_count))
         # atom_count.append(neighbor_count)
@@ -25,13 +25,14 @@ def data_preprocess_bind(data_index):
 def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
 
     lig = readpdb.read_pdb(data_index, 'lig')
+    lig_len = len(lig['x'])
     voxels = []
-    for lig_atom in range(min(CONST.DATA.lig_data_max, len(lig['x']))):
-        count = 0
-        for i in range(1, 3001):
-            if(i==data_index):
-                continue
-            pro = readpdb.read_pdb(i, 'pro')
+    count = 0
+    for i in range(1, 3001):
+        if (i == data_index):
+            continue
+        pro = readpdb.read_pdb(i, 'pro')
+        for lig_atom in range(lig_len):
 
             voxel, neighbor_count = fill_voxel(pro, lig, lig_atom = lig_atom)
 
@@ -40,8 +41,8 @@ def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
                 print('index: %d, lig_atom:%d, unbind_index: %d, atom count: %d'%(data_index, lig_atom, i, neighbor_count))
                 voxels.append(voxel)
                 # np.save('../preprocessed_data/%04d_unbind_%02d'%(data_index, count),voxel)
-                if(count == unbind_count):
-                    break
+                if(count == unbind_count*lig_len):
+                    return voxels
     return voxels
 
 def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
@@ -133,4 +134,6 @@ for data_index in range(1, CONST.DATA.processed_amount+1):
 print("bind data: " + str(len(bind_data)))
 np.save(CONST.DIR.bind_data, bind_data)
 print("unbind data: " + str(len(unbind_data)))
-np.save(CONST.DIR.unbind_data, unbind_data)
+data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
+for i in range(CONST.DATA.unbind_count):
+    np.save(CONST.DIR.unbind_data%(i+1), unbind_data[i*data_len:min((i+1)*data_len, len(unbind_data))])
