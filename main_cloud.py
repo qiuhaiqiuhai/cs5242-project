@@ -28,10 +28,9 @@ if not os.path.exists(model_dir):
 
 size = CONST.VOXEL.size
 step = CONST.VOXEL.step
-epochs = 20
+epochs = 10
 input_shape = (size, size, size, 4)
 processed_amount = CONST.DATA.processed_amount
-n_lig_atom = CONST.DATA.lig_data_max
 n_bind = 10000
 
 # define models
@@ -43,8 +42,13 @@ models.append(test2_network(input_shape=input_shape))
 models.append(test3_network(input_shape=input_shape))
 optimizer = optimizers.adadelta()
 
-for scale in [1, 2]:
+
+for scale in [1, 3, 5]:
 	n_unbind = math.floor(n_bind * scale)
+
+	train_x, train_y, class_name = read_processed_data(n_bind, n_unbind)
+	train_x, train_y = shuffle(train_x, train_y)
+
 	for i in [0, 3]:
 		model_name = model_names[i]
 		model = models[i]
@@ -54,15 +58,11 @@ for scale in [1, 2]:
 		logger.info("step is {0}".format(step))
 		logger.info("epochs is {0}".format(epochs))
 		logger.info("process from index {0} to {1}".format(1, processed_amount))
-		logger.info("max number of atoms taken for each ligand is {0}".format(n_lig_atom))
 		logger.info("unbind:bind scale is {0}:1".format(scale))
 		logger.info("training {0} bind data".format(n_bind))
 		logger.info("training {0} unbind data".format(n_unbind))
 
 		print (model.summary())
-
-		train_x, train_y, class_name = read_processed_data(n_bind, n_unbind)
-		train_x, train_y = shuffle(train_x, train_y)
 
 		model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 		h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_split=0.2)
