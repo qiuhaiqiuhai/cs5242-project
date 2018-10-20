@@ -5,17 +5,21 @@ import math
 import readpdb_example as readpdb
 from keras.utils import to_categorical
 import CONST
+from sklearn.utils import shuffle
 import plot3D
 
 
 file_dir_bind = "../preprocessed_data/%04d_bind_%02d.npy"
 file_dir_unbind = "../preprocessed_data/%04d_unbind_%02d.npy"
 
-def read_processed_data(bind_count = None, unbind_count = None):
+def read_processed_data(bind_count = None, unbind_count = None, shuffled = True):
     train_x = [] ; train_y = []
     class_name = ['bind', 'unbind']
 
     bind_data_origin = np.load(CONST.DIR.bind_data + '.npy')
+
+    if(shuffled):
+        bind_data_origin = shuffle(bind_data_origin)
     bind_data = bind_data_origin[:bind_count]
     print(class_name[0] + ' total:' + str(bind_data_origin.shape[0]) + ' take:' + str(len(bind_data)))
 
@@ -27,6 +31,9 @@ def read_processed_data(bind_count = None, unbind_count = None):
             unbind_data_origin = unbind_data_sub
         else:
             unbind_data_origin = np.append(unbind_data_origin, unbind_data_sub, axis=0)
+
+    if(shuffled):
+        unbind_data_origin = shuffle(unbind_data_origin)
     unbind_data = unbind_data_origin[:unbind_count]
     print(class_name[0] + ' total:' + str(unbind_data_origin.shape[0]) + ' take:' + str(len(unbind_data)))
 
