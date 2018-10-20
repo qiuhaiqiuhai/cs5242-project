@@ -22,6 +22,9 @@ folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
 dir = 'results/%s/'%folder_name
 if not os.path.exists(dir):
     os.makedirs(dir)
+model_dir = 'models/%s/'%folder_name
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
 
 size = CONST.VOXEL.size
 step = CONST.VOXEL.step
@@ -40,7 +43,7 @@ models.append(test2_network(input_shape=input_shape))
 models.append(test3_network(input_shape=input_shape))
 optimizer = optimizers.adadelta()
 
-for scale in [1, 5]:
+for scale in [1, 2]:
 	n_unbind = math.floor(n_bind * scale)
 	for i in [0, 3]:
 		model_name = model_names[i]
@@ -62,8 +65,13 @@ for scale in [1, 5]:
 		train_x, train_y = shuffle(train_x, train_y)
 
 		model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
 		h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_split=0.2)
 
-		np.savetxt(os.path.join(dir,'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.txt'%(size,step,epochs,n_unbind,model_name)),\
+		model.save_weights(
+			os.path.join(model_dir, 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s.h5' % (
+			size, step, epochs, n_unbind, model_name)))
+
+		np.savetxt(
+			os.path.join(dir,
+						 'box_size=%d,step=%d,epochs=%d,n_bind=%d,scale=%d,model=%s.txt'%(size,step,epochs,n_bind,scale,model_name)),\
 		           np.transpose([h.history['acc'], h.history['loss'], h.history['val_acc'], h.history['val_loss']]))
