@@ -52,7 +52,7 @@ def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
                 break
     return voxels
 
-def voxelise(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+def voxelise_1(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
     voxel = np.zeros((size, size, size, 4))
 
     for atom_recenter in pre_voxel:
@@ -66,30 +66,57 @@ def voxelise(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
 
         bias = size // 2
 
-        voxel[x1 + bias, y1 + bias, z1 + bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
-            atom_recenter[1] / step - y2) * abs(
-            atom_recenter[2] / step - z2)
-        voxel[x1 + bias, y1 + bias, z2 + bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
-            atom_recenter[1] / step - y2) * abs(
-            atom_recenter[2] / step - z1)
-        voxel[x1 + bias, y2 + bias, z1 + bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
-            atom_recenter[1] / step - y1) * abs(
-            atom_recenter[2] / step - z2)
-        voxel[x2 + bias, y1 + bias, z1 + bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
-            atom_recenter[1] / step - y2) * abs(
-            atom_recenter[2] / step - z2)
-        voxel[x1 + bias, y2 + bias, z2 + bias, channel] += abs(atom_recenter[0] / step - x2) * abs(
-            atom_recenter[1] / step - y1) * abs(
-            atom_recenter[2] / step - z1)
-        voxel[x2 + bias, y2 + bias, z1 + bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
-            atom_recenter[1] / step - y1) * abs(
-            atom_recenter[2] / step - z2)
-        voxel[x2 + bias, y1 + bias, z2 + bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
-            atom_recenter[1] / step - y2) * abs(
-            atom_recenter[2] / step - z1)
-        voxel[x2 + bias, y2 + bias, z2 + bias, channel] += abs(atom_recenter[0] / step - x1) * abs(
-            atom_recenter[1] / step - y1) * abs(
-            atom_recenter[2] / step - z1)
+        for a1, b1, c1, a2, b2, c2 in [(x1, y1, z1, x2, y2, z2),
+                                       (x1, y1, z2, x2, y2, z1),
+                                       (x1, y2, z1, x2, y1, z2),
+                                       (x2, y1, z1, x1, y2, z2),
+                                       (x2, y2, z1, x1, y1, z2),
+                                       (x1, y2, z2, x2, y1, z1),
+                                       (x2, y1, z2, x1, y2, z1),
+                                       (x2, y2, z2, x1, y1, z1)]:
+
+            voxel[a1 + bias, b1 + bias, c1 + bias, channel] += abs(atom_recenter[0] / step - a2) * abs(atom_recenter[1] / step - b2) * abs(atom_recenter[2] / step - c2)
+
+    return voxel
+
+def voxelise_2(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+    voxel = np.zeros((size, size, size, 4))
+
+    for atom_recenter in pre_voxel:
+        x1 = math.floor(atom_recenter[0] / step);
+        x2 = x1 + 1
+        y1 = math.floor(atom_recenter[1] / step);
+        y2 = y1 + 1
+        z1 = math.floor(atom_recenter[2] / step);
+        z2 = z1 + 1
+        channel = (atom_recenter[3] == 1) * 2 + (atom_recenter[4] == 'r')
+
+        bias = size // 2
+
+        for a1, b1, c1, a2, b2, c2 in [(x1, y1, z1, x2, y2, z2),
+                                       (x1, y1, z2, x2, y2, z1),
+                                       (x1, y2, z1, x2, y1, z2),
+                                       (x2, y1, z1, x1, y2, z2),
+                                       (x2, y2, z1, x1, y1, z2),
+                                       (x1, y2, z2, x2, y1, z1),
+                                       (x2, y1, z2, x1, y2, z1),
+                                       (x2, y2, z2, x1, y1, z1)]:
+
+            voxel[a1 + bias, b1 + bias, c1 + bias, channel] = max(voxel[a1 + bias, b1 + bias, c1 + bias, channel],abs(atom_recenter[0] / step - a2) * abs(atom_recenter[1] / step - b2) * abs(atom_recenter[2] / step - c2))
+
+    return voxel
+
+def voxelise_3(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+    voxel = np.zeros((size, size, size, 4))
+
+    for atom_recenter in pre_voxel:
+        x = round(atom_recenter[0] / step);
+        y = round(atom_recenter[1] / step);
+        z = round(atom_recenter[2] / step);
+        channel = (atom_recenter[3] == 1) * 2 + (atom_recenter[4] == 'r')
+
+        bias = size // 2
+        voxel[x + bias, y + bias, z + bias, channel] = 1
 
     return voxel
 
@@ -142,7 +169,7 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
 
 
 # atom_count = []
-
+voxelise = voxelise_3
 bind_data = []
 unbind_data = []
 for data_index in range(1, CONST.DATA.processed_amount+1):

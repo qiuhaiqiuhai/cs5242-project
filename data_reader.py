@@ -32,7 +32,7 @@ def read_processed_data(bind_count = None, unbind_count = None, shuffled = True)
         else:
             unbind_data_origin = np.append(unbind_data_origin, unbind_data_sub, axis=0)
 
-        if(unbind_data_origin.shape[0]>=unbind_count):
+        if(unbind_count and unbind_data_origin.shape[0]>=unbind_count):
             break;
 
     if(shuffled):
