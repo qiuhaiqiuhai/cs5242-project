@@ -69,7 +69,7 @@ def test2_3Dcnn(input_shape=(16, 16, 16, 4), class_num=2):
 # this network use 20 as cubic size, min-batch = 768 samples
 def test3_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
     model = Sequential()
-    model.add(Conv3D(128, input_shape=input_shape,kernel_size=(5, 5, 5), activation='elu'))
+    model.add(Conv3D(128, input_shape=input_shape,kernel_size=(5, 5, 5), activation='relu'))
     model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu'))
     model.add(MaxPool3D(pool_size=(2, 2, 2)))
     model.add(Dropout(0.25))

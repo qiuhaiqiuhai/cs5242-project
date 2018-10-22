@@ -12,11 +12,11 @@ import plot3D
 file_dir_bind = "../preprocessed_data/%04d_bind_%02d.npy"
 file_dir_unbind = "../preprocessed_data/%04d_unbind_%02d.npy"
 
-def read_processed_data(bind_count = None, unbind_count = None, shuffled = True):
+def read_processed_data(bind_count = None, unbind_count = None, shuffled = True, voxelise_i = 1):
     train_x = [] ; train_y = []
     class_name = ['bind', 'unbind']
 
-    bind_data_origin = np.load(CONST.DIR.bind_data + '.npy', mmap_mode='r')
+    bind_data_origin = np.load(CONST.DIR.bind_data%voxelise_i + '.npy', mmap_mode='r')
 
     if(shuffled):
         bind_data_origin = shuffle(bind_data_origin)
@@ -25,8 +25,8 @@ def read_processed_data(bind_count = None, unbind_count = None, shuffled = True)
 
     unbind_data_origin = None
     for i in range(CONST.DATA.unbind_count):
-        unbind_data_sub = np.load(CONST.DIR.unbind_data% (i + 1) + '.npy')
-        print(CONST.DIR.unbind_data% (i + 1) + ' total:' + str(unbind_data_sub.shape[0]) )
+        unbind_data_sub = np.load(CONST.DIR.unbind_data% (voxelise_i, i + 1) + '.npy')
+        print(CONST.DIR.unbind_data% (voxelise_i, i + 1) + ' total:' + str(unbind_data_sub.shape[0]) )
         if(unbind_data_origin is None):
             unbind_data_origin = unbind_data_sub
         else:
