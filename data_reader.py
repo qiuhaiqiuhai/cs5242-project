@@ -16,7 +16,7 @@ def read_processed_data(bind_count = None, unbind_count = None, shuffled = True)
     train_x = [] ; train_y = []
     class_name = ['bind', 'unbind']
 
-    bind_data_origin = np.load(CONST.DIR.bind_data + '.npy')
+    bind_data_origin = np.load(CONST.DIR.bind_data + '.npy', mmap_mode='r')
 
     if(shuffled):
         bind_data_origin = shuffle(bind_data_origin)
