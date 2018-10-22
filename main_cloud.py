@@ -37,7 +37,7 @@ epochs = 15
 input_shape = (size, size, size, 4)
 processed_amount = CONST.DATA.processed_amount
 n_bind = 10000
-n_repeat = 1 # retrain how many times. If no need to retrain, put 0
+n_repeat = 0 # retrain how many times. If no need to retrain, put 0
 selected_acc = 0.95
 
 # define models
@@ -72,20 +72,21 @@ def load_model(file_name):
         json = f.read()
     loaded_model = model_from_json(json)
     loaded_model.load_weights(os.path.join(model_dir, file_name + '.h5'))
-    return model
+    return loaded_model
 
 def split_data(x, y, split=0.2):
     n_train = math.floor(len(x)*(1-split))
     return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
-for scale in [1, 2]:
+
+for scale in [1, 2, 3]:
     n_unbind = math.floor(n_bind * scale)
 
     x, y, class_name = read_processed_data(n_bind, n_unbind)
     x, y = shuffle(x, y)
     train_x, train_y, test_x, test_y = split_data(x, y)
 
-    for i in [0, 3]: # we select model 0, 3
+    for i in [3]: # we select model 3
         model_name = model_names[i]
         model = models[i]
         file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s' % (
@@ -117,5 +118,4 @@ for scale in [1, 2]:
             save_model_info(file_name % repeat_count, loaded_model, h)
 
         logger.info("*************** end ****************")
-
 
