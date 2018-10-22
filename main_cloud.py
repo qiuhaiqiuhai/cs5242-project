@@ -1,8 +1,6 @@
-from models import trial_3Dcnn as test0_network
-from models import test1_3Dcnn as test1_network
-from models import test2_3Dcnn as test2_network
-from models import test3_3Dcnn as test3_network
+from models import trial_3Dcnn, test1_3Dcnn, test2_3Dcnn, test3_3Dcnn, test4_3Dcnn
 from keras import optimizers, losses
+from keras.callbacks import EarlyStopping
 from keras.models import load_model, model_from_json
 from data_reader import read_processed_data
 from sklearn.utils import shuffle
@@ -43,11 +41,13 @@ selected_acc = 0.95
 # define models
 model_names = ['test0', 'test1', 'test2', 'test3']
 models = []
-models.append(test0_network(input_shape=input_shape))
-models.append(test1_network(input_shape=input_shape))
-models.append(test2_network(input_shape=input_shape))
-models.append(test3_network(input_shape=input_shape))
+models.append(trial_3Dcnn(input_shape=input_shape))
+models.append(test1_3Dcnn(input_shape=input_shape))
+models.append(test2_3Dcnn(input_shape=input_shape))
+models.append(test3_3Dcnn(input_shape=input_shape))
+models.append(test4_3Dcnn(input_shape=input_shape))
 optimizer = optimizers.adadelta()
+earlystopper = EarlyStopping(patience=3, verbose=2, monitor='val_loss')
 
 def save_model_info(file_name, model, h):
     logger.info('save model weights in {0}...'.format(model_dir+file_name))
@@ -105,7 +105,8 @@ for voxelise_i in [1, 2, 3]:
             print (model.summary())
 
             model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-            h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_data=(test_x, test_y))
+            h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
+                          validation_data=(test_x, test_y), callbacks=earlystopper)
             save_model_info(file_name%0, model, h)
             for repeat_count in range(1, n_repeat+1):
                 train_x, train_y = shuffle(train_x, train_y)
@@ -115,7 +116,8 @@ for voxelise_i in [1, 2, 3]:
                 loaded_model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
                 logger.info('retrain...')
-                h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_data=(test_x, test_y))
+                h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
+                                     validation_data=(test_x, test_y), callbacks=earlystopper)
                 save_model_info(file_name % repeat_count, loaded_model, h)
 
             logger.info("*************** end training ****************")
