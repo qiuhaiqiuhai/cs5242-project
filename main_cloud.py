@@ -33,7 +33,7 @@ if not os.path.exists(model_dir):
 
 size = CONST.VOXEL.size
 step = CONST.VOXEL.step
-epochs = 15
+epochs = 10
 input_shape = (size, size, size, 4)
 processed_amount = CONST.DATA.processed_amount
 n_bind = 10000
@@ -60,8 +60,8 @@ def save_model_info(file_name, model, h):
     np.savetxt(os.path.join(dir, file_name+ '.txt'), \
                np.transpose([h.history['acc'], h.history['loss'], h.history['val_acc'], h.history['val_loss']]))
     best_acc = max(h.history['val_acc'])
-    if best_acc > selected_acc:
-        logger.info('model acc > {1}, is saved as {0}...'.format(selected_dir+file_name, selected_acc))
+    if best_acc >= selected_acc:
+        logger.info('model acc >= {1}, is saved as {0}...'.format(selected_dir+file_name, selected_acc))
         model.save_weights(os.path.join(selected_dir, file_name + '_%.2f.h5'%best_acc))
         with open(os.path.join(selected_dir, file_name + '_%.2f.json'%best_acc), "w") as json_file:
             json_file.write(model_json)
