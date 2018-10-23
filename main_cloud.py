@@ -36,12 +36,12 @@ input_shape = (size, size, size, 4)
 processed_amount = CONST.DATA.processed_amount
 n_bind = 10000
 n_retrain = 0 # retrain how many times. If no need to retrain, put 0
-selected_acc = 0.95
-n_repeat = 3
+selected_acc = 0.96
+n_repeat = 1
 
 
 # define models
-model_names = ['test0', 'test1', 'test2', 'test3']
+model_names = ['test0', 'test1', 'test2', 'test3', 'test4']
 models = []
 models.append(trial_3Dcnn(input_shape=input_shape))
 models.append(test1_3Dcnn(input_shape=input_shape))
@@ -92,16 +92,16 @@ def split_data(x, y, split=0.2):
     n_train = math.floor(len(x)*(1-split))
     return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
-for voxelise_i in [1, 2, 3]:
+for voxelise_i in [1]:
     logger.info("using voxelise_{0}".format(voxelise_i))
     for scale in [1]: # unbind:bind scale
         n_unbind = math.floor(n_bind * scale)
-        x, y, class_name = read_processed_data(n_bind, n_unbind, voxelise_i)
+        x, y, class_name = read_processed_data(bind_count=n_bind, unbind_count=n_unbind, voxelise_i=voxelise_i)
         for repeat_i in range(n_repeat):
             logger.info("repeating {0}".format(repeat_i))
             x, y = shuffle(x, y)
             train_x, train_y, test_x, test_y = split_data(x, y)
-            for model_i in [3]: # we select model 3
+            for model_i in [4]: # we select model 3
                 model_name = model_names[model_i]
                 model = get_model(model_i)
                 file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d' % (
