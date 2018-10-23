@@ -106,7 +106,7 @@ for voxelise_i in [1, 2, 3]:
 
             model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
             h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
-                          validation_data=(test_x, test_y), callbacks=earlystopper)
+                          validation_data=(test_x, test_y), callbacks=[earlystopper])
             save_model_info(file_name%0, model, h)
             for repeat_count in range(1, n_repeat+1):
                 train_x, train_y = shuffle(train_x, train_y)
@@ -117,7 +117,7 @@ for voxelise_i in [1, 2, 3]:
 
                 logger.info('retrain...')
                 h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
-                                     validation_data=(test_x, test_y), callbacks=earlystopper)
+                                     validation_data=(test_x, test_y), callbacks=[earlystopper])
                 save_model_info(file_name % repeat_count, loaded_model, h)
 
             logger.info("*************** end training ****************")

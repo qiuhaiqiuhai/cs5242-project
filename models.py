@@ -83,3 +83,22 @@ def test3_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
     model.add(Dense(class_num, activation='softmax'))
 
     return model
+
+# change padding to "same" and all kernal size as 3
+# this network use 20 as cubic size, min-batch = 768 samples
+def test4_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+    model = Sequential()
+    model.add(Conv3D(128, input_shape=input_shape,kernel_size=(3, 3, 3), activation='relu', padding="same"))
+    model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+    model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(class_num, activation='softmax'))
+
+    return model
