@@ -1,8 +1,6 @@
-from models import trial_3Dcnn as test0_network
-from models import test1_3Dcnn as test1_network
-from models import test2_3Dcnn as test2_network
-from models import test3_3Dcnn as test3_network
+from models import trial_3Dcnn, test1_3Dcnn, test2_3Dcnn, test3_3Dcnn, test4_3Dcnn
 from keras import optimizers, losses
+from keras.callbacks import EarlyStopping
 from keras.models import load_model, model_from_json
 from data_reader import read_processed_data
 from sklearn.utils import shuffle
@@ -37,17 +35,33 @@ epochs = 10
 input_shape = (size, size, size, 4)
 processed_amount = CONST.DATA.processed_amount
 n_bind = 10000
-n_repeat = 0 # retrain how many times. If no need to retrain, put 0
-selected_acc = 0.95
+n_retrain = 0 # retrain how many times. If no need to retrain, put 0
+selected_acc = 0.96
+n_repeat = 1
+
 
 # define models
-model_names = ['test0', 'test1', 'test2', 'test3']
+model_names = ['test0', 'test1', 'test2', 'test3', 'test4']
 models = []
-models.append(test0_network(input_shape=input_shape))
-models.append(test1_network(input_shape=input_shape))
-models.append(test2_network(input_shape=input_shape))
-models.append(test3_network(input_shape=input_shape))
+models.append(trial_3Dcnn(input_shape=input_shape))
+models.append(test1_3Dcnn(input_shape=input_shape))
+models.append(test2_3Dcnn(input_shape=input_shape))
+models.append(test3_3Dcnn(input_shape=input_shape))
+models.append(test4_3Dcnn(input_shape=input_shape))
 optimizer = optimizers.adadelta()
+earlystopper = EarlyStopping(patience=3, verbose=2, monitor='val_loss')
+
+def get_model(index):
+    if index == 0:
+        return trial_3Dcnn(input_shape=input_shape)
+    if index == 1:
+        return test1_3Dcnn(input_shape=input_shape)
+    if index == 2:
+        return test2_3Dcnn(input_shape=input_shape)
+    if index == 3:
+        return test3_3Dcnn(input_shape=input_shape)
+    if index == 4:
+        return test4_3Dcnn(input_shape=input_shape)
 
 def save_model_info(file_name, model, h):
     logger.info('save model weights in {0}...'.format(model_dir+file_name))
@@ -78,44 +92,48 @@ def split_data(x, y, split=0.2):
     n_train = math.floor(len(x)*(1-split))
     return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
+for voxelise_i in [1]:
+    logger.info("using voxelise_{0}".format(voxelise_i))
+    for scale in [1]: # unbind:bind scale
+        n_unbind = math.floor(n_bind * scale)
+        x, y, class_name = read_processed_data(bind_count=n_bind, unbind_count=n_unbind, voxelise_i=voxelise_i)
+        for repeat_i in range(n_repeat):
+            logger.info("repeating {0}".format(repeat_i))
+            x, y = shuffle(x, y)
+            train_x, train_y, test_x, test_y = split_data(x, y)
+            for model_i in [4]: # we select model 3
+                model_name = model_names[model_i]
+                model = get_model(model_i)
+                file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d' % (
+                     size, step, epochs, scale, model_name, voxelise_i, repeat_i)+',retrain=%d'
+                logger.info("*************** start training ****************")
+                logger.info("model is {0}".format(model_name))
+                logger.info("box size is {0}".format(size))
+                logger.info("step is {0}".format(step))
+                logger.info("epochs is {0}".format(epochs))
+                logger.info("process from index {0} to {1}".format(1, processed_amount))
+                logger.info("unbind:bind scale is {0}:1".format(scale))
+                logger.info("training {0} bind data".format(n_bind))
+                logger.info("training {0} unbind data".format(n_unbind))
+                logger.info("voxelise is {0}".format(voxelise_i))
 
-for scale in [1, 2, 3]:
-    n_unbind = math.floor(n_bind * scale)
+                print (model.summary())
 
-    x, y, class_name = read_processed_data(n_bind, n_unbind)
-    x, y = shuffle(x, y)
-    train_x, train_y, test_x, test_y = split_data(x, y)
+                model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+                h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
+                              validation_data=(test_x, test_y), callbacks=[earlystopper])
+                save_model_info(file_name%0, model, h)
+                for repeat_count in range(1, n_retrain+1):
+                    train_x, train_y = shuffle(train_x, train_y)
+                    logger.info('retrain {0}'.format(repeat_count))
+                    # load model
+                    loaded_model = load_model(file_name%(repeat_count-1))
+                    loaded_model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-    for i in [3]: # we select model 3
-        model_name = model_names[i]
-        model = models[i]
-        file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s' % (
-		     size, step, epochs, scale, model_name)+',repeat=%d'
-        logger.info("*************** start ****************")
-        logger.info("model is {0}".format(model_name))
-        logger.info("box size is {0}".format(size))
-        logger.info("step is {0}".format(step))
-        logger.info("epochs is {0}".format(epochs))
-        logger.info("process from index {0} to {1}".format(1, processed_amount))
-        logger.info("unbind:bind scale is {0}:1".format(scale))
-        logger.info("training {0} bind data".format(n_bind))
-        logger.info("training {0} unbind data".format(n_unbind))
+                    logger.info('retraining...')
+                    h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
+                                         validation_data=(test_x, test_y), callbacks=[earlystopper])
+                    save_model_info(file_name % repeat_count, loaded_model, h)
 
-        print (model.summary())
-
-        model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-        h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_data=(test_x, test_y))
-        save_model_info(file_name%0, model, h)
-        for repeat_count in range(1, n_repeat+1):
-            train_x, train_y = shuffle(train_x, train_y)
-            logger.info('repeat {0}'.format(repeat_count))
-            # load model
-            loaded_model = load_model(file_name%(repeat_count-1))
-            loaded_model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
-            logger.info('retrain...')
-            h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2, validation_data=(test_x, test_y))
-            save_model_info(file_name % repeat_count, loaded_model, h)
-
-        logger.info("*************** end ****************")
+                logger.info("*************** end training ****************")
 

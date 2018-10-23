@@ -169,19 +169,28 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
 
 
 # atom_count = []
-voxelise = voxelise_3
-bind_data = []
-unbind_data = []
-for data_index in range(1, CONST.DATA.processed_amount+1):
-    bind_data.extend(data_preprocess_bind(data_index))
-    unbind_data.extend(data_preprocess_unbind(data_index))
+voxelises = [None, voxelise_1, voxelise_2, voxelise_3]
 
-print("bind data: " + str(len(bind_data)))
-np.save(CONST.DIR.bind_data, bind_data)
-print("unbind data: " + str(len(unbind_data)))
-data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
-for i in range(CONST.DATA.unbind_count):
-    np.save(CONST.DIR.unbind_data%(i+1), unbind_data[i*data_len:min((i+1)*data_len, len(unbind_data))])
+for voxelise_i in [1, 2, 3]:
+
+    voxelise = voxelises[voxelise_i]
+
+    bind_data = []
+    unbind_data = []
+
+    if not os.path.exists(CONST.DIR.voxelise_base%voxelise_i):
+        os.makedirs(CONST.DIR.voxelise_base%voxelise_i)
+
+    for data_index in range(1, CONST.DATA.processed_amount+1):
+        bind_data.extend(data_preprocess_bind(data_index))
+        unbind_data.extend(data_preprocess_unbind(data_index))
+
+    print("bind data: " + str(len(bind_data)))
+    np.save(CONST.DIR.bind_data%voxelise_i, bind_data)
+    print("unbind data: " + str(len(unbind_data)))
+    data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
+    for i in range(CONST.DATA.unbind_count):
+        np.save(CONST.DIR.unbind_data%(voxelise_i,(i+1)), unbind_data[i*data_len:min((i+1)*data_len, len(unbind_data))])
 
 end = time.time()
 print(end - start)

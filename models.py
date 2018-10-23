@@ -1,7 +1,7 @@
 import keras
 from keras.models import Model
 from keras.models import Sequential
-from keras.layers import Input, Dense, Conv3D, Activation, MaxPool3D, Dropout, Flatten
+from keras.layers import Input, Dense, Conv3D, Activation, MaxPool3D, Dropout, Flatten, BatchNormalization
 
 
 def trial_3Dcnn(input_shape=(18, 18, 18, 4), class_num=2):
@@ -67,9 +67,10 @@ def test2_3Dcnn(input_shape=(16, 16, 16, 4), class_num=2):
 
 # AtomNet: A Deep Convolutional Neural Network for Bioactivity Prediction in Structure-based Drug Discovery
 # this network use 20 as cubic size, min-batch = 768 samples
+# can reach to 0.95 after 5-8 epochs
 def test3_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
     model = Sequential()
-    model.add(Conv3D(128, input_shape=input_shape,kernel_size=(5, 5, 5), activation='elu'))
+    model.add(Conv3D(128, input_shape=input_shape,kernel_size=(5, 5, 5), activation='relu'))
     model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu'))
     model.add(MaxPool3D(pool_size=(2, 2, 2)))
     model.add(Dropout(0.25))
@@ -83,3 +84,100 @@ def test3_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
     model.add(Dense(class_num, activation='softmax'))
 
     return model
+
+# change padding to "same" and all kernal size as 3, remove one layer because with 4 layer, one epoch needs 555s
+# time taken for one epoch is 463s
+# best acc is around 0.955
+# def test4_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+#     model = Sequential()
+#     model.add(Conv3D(128, input_shape=input_shape,kernel_size=(3, 3, 3), activation='relu', padding="same"))
+#     model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(Dropout(0.25))
+#     model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(Dropout(0.25))
+#     model.add(Flatten())
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dense(class_num, activation='softmax'))
+
+#     return model
+
+# reduce filter numbers
+# time taken for one epoch is 185s
+# best acc is 0.949
+# def test4_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+#     model = Sequential()
+#     model.add(Conv3D(64, input_shape=input_shape,kernel_size=(3, 3, 3), activation='relu', padding="same"))
+#     model.add(Conv3D(128, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(Dropout(0.25))
+#     model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(Dropout(0.25))
+#     model.add(Flatten())
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dense(class_num, activation='softmax'))
+
+#     return model
+
+# change kernel size to 5
+# time taken for one epoch is 342s
+# best acc is around 0.965
+# def test4_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+#     model = Sequential()
+#     model.add(Conv3D(64, input_shape=input_shape,kernel_size=(5, 5, 5), activation='relu', padding="same"))
+#     model.add(Conv3D(128, kernel_size=(5, 5, 5), activation='relu', padding="same"))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(Dropout(0.25))
+#     model.add(Conv3D(256, kernel_size=(5, 5, 5), activation='relu', padding="same"))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(Dropout(0.25))
+#     model.add(Flatten())
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dense(class_num, activation='softmax'))
+
+#     return model
+
+# remove padding for 2,3 3D conv layers reduce training params and add batch normalization before maxpool
+# doesn't work
+# def test4_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+#     model = Sequential()
+#     model.add(Conv3D(64, input_shape=input_shape,kernel_size=(5, 5, 5), activation='relu', padding="same"))
+#     model.add(Conv3D(128, kernel_size=(3, 3, 3), activation='relu'))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(BatchNormalization())
+#     model.add(Dropout(0.25))
+#     model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu'))
+#     model.add(MaxPool3D(pool_size=(2, 2, 2)))
+#     model.add(BatchNormalization())
+#     model.add(Dropout(0.25))
+#     model.add(Flatten())
+#     model.add(Dense(1024, activation='relu'))
+#     model.add(Dropout(0.5))
+#     model.add(Dense(class_num, activation='softmax'))
+
+#     return model
+
+# remove padding for 2,3 3D conv layers reduce training params and remove one dense layer
+# time taken for one epoch is 129s
+# best acc is around 0.963 at epoch 6
+def test4_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+    model = Sequential()
+    model.add(Conv3D(64, input_shape=input_shape,kernel_size=(5, 5, 5), activation='relu', padding="same"))
+    model.add(Conv3D(128, kernel_size=(3, 3, 3), activation='relu'))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu'))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(class_num, activation='softmax'))
+
+    return model
+
