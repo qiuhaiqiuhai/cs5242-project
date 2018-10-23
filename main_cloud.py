@@ -35,8 +35,10 @@ epochs = 10
 input_shape = (size, size, size, 4)
 processed_amount = CONST.DATA.processed_amount
 n_bind = 10000
-n_repeat = 0 # retrain how many times. If no need to retrain, put 0
+n_retrain = 0 # retrain how many times. If no need to retrain, put 0
 selected_acc = 0.95
+n_repeat = 5
+
 
 # define models
 model_names = ['test0', 'test1', 'test2', 'test3']
@@ -83,42 +85,43 @@ for voxelise_i in [1, 2, 3]:
     for scale in [1]: # unbind:bind scale
         n_unbind = math.floor(n_bind * scale)
         x, y, class_name = read_processed_data(n_bind, n_unbind, voxelise_i)
-        x, y = shuffle(x, y)
-        train_x, train_y, test_x, test_y = split_data(x, y)
+        for repeat_i in range(n_repeat):
+            logger.info("repeating {0}".format(repeat_i))
+            x, y = shuffle(x, y)
+            train_x, train_y, test_x, test_y = split_data(x, y)
+            for model_i in [3]: # we select model 3
+                model_name = model_names[model_i]
+                model = models[model_i]
+                file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d' % (
+                     size, step, epochs, scale, model_name, voxelise_i, repeat_i)+',retrain=%d'
+                logger.info("*************** start training ****************")
+                logger.info("model is {0}".format(model_name))
+                logger.info("box size is {0}".format(size))
+                logger.info("step is {0}".format(step))
+                logger.info("epochs is {0}".format(epochs))
+                logger.info("process from index {0} to {1}".format(1, processed_amount))
+                logger.info("unbind:bind scale is {0}:1".format(scale))
+                logger.info("training {0} bind data".format(n_bind))
+                logger.info("training {0} unbind data".format(n_unbind))
+                logger.info("voxelise is {0}".format(voxelise_i))
 
-        for model_i in [3]: # we select model 3
-            model_name = model_names[model_i]
-            model = models[model_i]
-            file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d' % (
-                 size, step, epochs, scale, model_name, voxelise_i)+',repeat=%d'
-            logger.info("*************** start training ****************")
-            logger.info("model is {0}".format(model_name))
-            logger.info("box size is {0}".format(size))
-            logger.info("step is {0}".format(step))
-            logger.info("epochs is {0}".format(epochs))
-            logger.info("process from index {0} to {1}".format(1, processed_amount))
-            logger.info("unbind:bind scale is {0}:1".format(scale))
-            logger.info("training {0} bind data".format(n_bind))
-            logger.info("training {0} unbind data".format(n_unbind))
-            logger.info("voxelise is {0}".format(voxelise_i))
+                print (model.summary())
 
-            print (model.summary())
+                model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+                h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
+                              validation_data=(test_x, test_y), callbacks=[earlystopper])
+                save_model_info(file_name%0, model, h)
+                for repeat_count in range(1, n_retrain+1):
+                    train_x, train_y = shuffle(train_x, train_y)
+                    logger.info('retrain {0}'.format(repeat_count))
+                    # load model
+                    loaded_model = load_model(file_name%(repeat_count-1))
+                    loaded_model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-            model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-            h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
-                          validation_data=(test_x, test_y), callbacks=[earlystopper])
-            save_model_info(file_name%0, model, h)
-            for repeat_count in range(1, n_repeat+1):
-                train_x, train_y = shuffle(train_x, train_y)
-                logger.info('repeat {0}'.format(repeat_count))
-                # load model
-                loaded_model = load_model(file_name%(repeat_count-1))
-                loaded_model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+                    logger.info('retraining...')
+                    h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
+                                         validation_data=(test_x, test_y), callbacks=[earlystopper])
+                    save_model_info(file_name % repeat_count, loaded_model, h)
 
-                logger.info('retrain...')
-                h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
-                                     validation_data=(test_x, test_y), callbacks=[earlystopper])
-                save_model_info(file_name % repeat_count, loaded_model, h)
-
-            logger.info("*************** end training ****************")
+                logger.info("*************** end training ****************")
 
