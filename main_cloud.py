@@ -37,7 +37,7 @@ processed_amount = CONST.DATA.processed_amount
 n_bind = 10000
 n_retrain = 0 # retrain how many times. If no need to retrain, put 0
 selected_acc = 0.95
-n_repeat = 5
+n_repeat = 3
 
 
 # define models
@@ -50,6 +50,18 @@ models.append(test3_3Dcnn(input_shape=input_shape))
 models.append(test4_3Dcnn(input_shape=input_shape))
 optimizer = optimizers.adadelta()
 earlystopper = EarlyStopping(patience=3, verbose=2, monitor='val_loss')
+
+def get_model(index):
+    if index == 0:
+        return trial_3Dcnn(input_shape=input_shape)
+    if index == 1:
+        return test1_3Dcnn(input_shape=input_shape)
+    if index == 2:
+        return test2_3Dcnn(input_shape=input_shape)
+    if index == 3:
+        return test3_3Dcnn(input_shape=input_shape)
+    if index == 4:
+        return test4_3Dcnn(input_shape=input_shape)
 
 def save_model_info(file_name, model, h):
     logger.info('save model weights in {0}...'.format(model_dir+file_name))
@@ -91,7 +103,7 @@ for voxelise_i in [1, 2, 3]:
             train_x, train_y, test_x, test_y = split_data(x, y)
             for model_i in [3]: # we select model 3
                 model_name = model_names[model_i]
-                model = models[model_i]
+                model = get_model(model_i)
                 file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d' % (
                      size, step, epochs, scale, model_name, voxelise_i, repeat_i)+',retrain=%d'
                 logger.info("*************** start training ****************")
