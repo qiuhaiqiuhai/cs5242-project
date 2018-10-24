@@ -6,6 +6,7 @@ import readpdb_example as readpdb
 from keras.utils import to_categorical
 import CONST
 from sklearn.utils import shuffle
+import pickle
 import plot3D
 
 
@@ -39,9 +40,13 @@ def read_processed_data(bind_count = None, unbind_count = None, shuffled = True,
     if(shuffled):
         unbind_data_origin = shuffle(unbind_data_origin)
     unbind_data = unbind_data_origin[:unbind_count]
-    print(class_name[0] + ' total:' + str(unbind_data_origin.shape[0]) + ' take:' + str(len(unbind_data)))
+    print(class_name[1] + ' total:' + str(unbind_data_origin.shape[0]) + ' take:' + str(len(unbind_data)))
 
 
     return np.append(bind_data, unbind_data, axis=0), to_categorical(np.append(np.zeros(len(bind_data)), np.ones(len(unbind_data)),axis=0)), class_name
+
+def read_processed_test(pro_id):
+    voxels_list = pickle.load(open(CONST.DIR.preprocess_test+'%04d_pro.p'%pro_id, "rb"))
+    return voxels_list
 
 # read_processed_data()
