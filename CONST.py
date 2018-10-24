@@ -4,12 +4,13 @@ class VOXEL:
     ch_pro_p, ch_lig_p, ch_pro_h, ch_lig_h = 0, 1, 2, 3
 
 class DATA:
+    test_total = 824
     unbind_count = 2 # For one ligand atom, there are how many unbind processed data
-    processed_amount = 2400
-
+    processed_amount = 100
 
 
 class DIR:
+    preprocess_test = '../preprocessed_test/'
     preprocess_base = '../preprocessed_data/'
     bind_data = '../preprocessed_data/voxelise_%d/bind_data'
     unbind_data = '../preprocessed_data/voxelise_%d/unbind_data_%02d'

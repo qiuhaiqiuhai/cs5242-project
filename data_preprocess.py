@@ -65,7 +65,7 @@ def voxelise_1(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
         y2 = y1 + 1
         z1 = math.floor(atom_recenter[2] / step);
         z2 = z1 + 1
-        channel = (atom_recenter[3] == 1) * 2 + (atom_recenter[4] == 'r')
+        channel = (atom_recenter[3] == 'h') * 2 + (atom_recenter[4] == 'r')
 
         bias = size // 2
 
@@ -92,7 +92,7 @@ def voxelise_2(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
         y2 = y1 + 1
         z1 = math.floor(atom_recenter[2] / step);
         z2 = z1 + 1
-        channel = (atom_recenter[3] == 1) * 2 + (atom_recenter[4] == 'r')
+        channel = (atom_recenter[3] == 'h') * 2 + (atom_recenter[4] == 'r')
 
         bias = size // 2
 
@@ -116,7 +116,7 @@ def voxelise_3(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
         x = round(atom_recenter[0] / step);
         y = round(atom_recenter[1] / step);
         z = round(atom_recenter[2] / step);
-        channel = (atom_recenter[3] == 1) * 2 + (atom_recenter[4] == 'r')
+        channel = (atom_recenter[3] == 'h') * 2 + (atom_recenter[4] == 'r')
 
         bias = size // 2
         voxel[x + bias, y + bias, z + bias, channel] = 1
@@ -172,6 +172,7 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
 
 
 # atom_count = []
+
 voxelises = [None, voxelise_1, voxelise_2, voxelise_3]
 '''
 for voxelise_i in [1, 2, 3]:

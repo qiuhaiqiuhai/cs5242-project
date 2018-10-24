@@ -5,34 +5,6 @@ import numpy as np
 import CONST
 import readpdb_example as readpdb
 
-
-def read_pdb(filename):
-    with open(filename, 'r') as file:
-        strline_L = file.readlines()
-    # print(strline_L)
-
-    X_list = list()
-    Y_list = list()
-    Z_list = list()
-    atomtype_list = list()
-    for strline in strline_L:
-        # removes all whitespace at the start and end, including spaces, tabs, newlines and carriage returns
-        stripped_line = strline.strip()
-        # print(stripped_line)
-
-        splitted_line = stripped_line.split('\t')
-
-        X_list.append(float(splitted_line[0]))
-        Y_list.append(float(splitted_line[1]))
-        Z_list.append(float(splitted_line[2]))
-        atomtype_list.append(str(splitted_line[3]))
-
-    return {'x':X_list,
-			'y':Y_list,
-			'z':Z_list,
-			'type':atomtype_list}
-
-
 def plot_atoms(pro, lig):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -80,9 +52,9 @@ def plot_voxel(voxel):
 
 
 
-# pro = read_pdb('../testing_data_release/testing_data/0009_pro_cg.pdb')
-# lig = read_pdb('../testing_data_release/testing_data/0004_lig_cg.pdb')
-# plot_atoms(pro, lig)
+pro = readpdb.read_pdb_test(1, 'pro')
+lig = readpdb.read_pdb_test(365, 'lig')
+plot_atoms(pro, lig)
 
-# voxel = np.load('../preprocessed_data/0001_bind_01.npy')
+# voxel = np.load('../preprocessed_data/bind_data.npy')[0]
 # plot_voxel(voxel)
