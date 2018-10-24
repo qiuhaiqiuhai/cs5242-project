@@ -11,6 +11,8 @@ start = time.time()
 if not os.path.exists(CONST.DIR.preprocess_base):
     os.makedirs(CONST.DIR.preprocess_base)
 
+training_indexes = np.loadtxt('training_indexes.txt')
+
 def data_preprocess_bind(data_index):
     voxels = []
     pro = readpdb.read_pdb(data_index, 'pro')
@@ -30,7 +32,8 @@ def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count):
     lig_len = len(lig['x'])
     voxels = []
     count = 0
-    for i in range(1, 3001):
+    # use only selected training set
+    for i in training_indexes:
         if (i == data_index):
             continue
         pro = readpdb.read_pdb(i, 'pro')
@@ -170,7 +173,7 @@ def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOX
 
 # atom_count = []
 voxelises = [None, voxelise_1, voxelise_2, voxelise_3]
-
+'''
 for voxelise_i in [1, 2, 3]:
 
     voxelise = voxelises[voxelise_i]
@@ -181,7 +184,7 @@ for voxelise_i in [1, 2, 3]:
     if not os.path.exists(CONST.DIR.voxelise_base%voxelise_i):
         os.makedirs(CONST.DIR.voxelise_base%voxelise_i)
 
-    for data_index in range(1, CONST.DATA.processed_amount+1):
+    for data_index in training_indexes[:CONST.DATA.processed_amount+1]:
         bind_data.extend(data_preprocess_bind(data_index))
         unbind_data.extend(data_preprocess_unbind(data_index))
 
@@ -191,6 +194,29 @@ for voxelise_i in [1, 2, 3]:
     data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
     for i in range(CONST.DATA.unbind_count):
         np.save(CONST.DIR.unbind_data%(voxelise_i,(i+1)), unbind_data[i*data_len:min((i+1)*data_len, len(unbind_data))])
+'''
+
+# use only selected training set to train
+for voxelise_i in [1]:
+
+    voxelise = voxelises[voxelise_i]
+
+    bind_data = []
+    unbind_data = []
+
+    if not os.path.exists(CONST.DIR.training_base%voxelise_i):
+        os.makedirs(CONST.DIR.training_base%voxelise_i)
+
+    for data_index in training_indexes[:CONST.DATA.processed_amount+1]:
+        bind_data.extend(data_preprocess_bind(data_index))
+        unbind_data.extend(data_preprocess_unbind(data_index))
+
+    print("bind data: " + str(len(bind_data)))
+    np.save(CONST.DIR.training_bind_data%voxelise_i, bind_data)
+    print("unbind data: " + str(len(unbind_data)))
+    data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
+    for i in range(CONST.DATA.unbind_count):
+        np.save(CONST.DIR.training_unbind_data%(voxelise_i,(i+1)), unbind_data[i*data_len:min((i+1)*data_len, len(unbind_data))])
 
 end = time.time()
 print(end - start)
