@@ -1,6 +1,6 @@
 from models import trial_3Dcnn, test1_3Dcnn, test2_3Dcnn, test3_3Dcnn, test4_3Dcnn
 from keras import optimizers, losses
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import load_model, model_from_json
 from data_reader import read_processed_data
 from sklearn.utils import shuffle
@@ -8,6 +8,8 @@ import logging, math
 import sys, os, datetime
 import numpy as np
 import CONST
+import glob
+from shutil import copyfile
 
 logging.basicConfig(
     level=logging.INFO,
@@ -49,7 +51,7 @@ models.append(test2_3Dcnn(input_shape=input_shape))
 models.append(test3_3Dcnn(input_shape=input_shape))
 models.append(test4_3Dcnn(input_shape=input_shape))
 optimizer = optimizers.adadelta()
-earlystopper = EarlyStopping(patience=3, verbose=2, monitor='val_loss')
+earlystopper = EarlyStopping(patience=2, verbose=2, monitor='val_loss')
 
 def get_model(index):
     if index == 0:
@@ -65,7 +67,7 @@ def get_model(index):
 
 def save_model_info(file_name, model, h):
     logger.info('save model weights in {0}...'.format(model_dir+file_name))
-    model.save_weights(os.path.join(model_dir, file_name+'.h5'))
+    #model.save_weights(os.path.join(model_dir, file_name+'.h5'))
     model_json = model.to_json()
     with open(os.path.join(model_dir, file_name+'.json'), "w") as json_file:
         json_file.write(model_json)
@@ -73,11 +75,19 @@ def save_model_info(file_name, model, h):
     logger.info('save results in {0}...'.format(dir+file_name))
     np.savetxt(os.path.join(dir, file_name+ '.txt'), \
                np.transpose([h.history['acc'], h.history['loss'], h.history['val_acc'], h.history['val_loss']]))
+
     best_acc = max(h.history['val_acc'])
     if best_acc >= selected_acc:
         logger.info('model acc >= {1}, is saved as {0}...'.format(selected_dir+file_name, selected_acc))
-        model.save_weights(os.path.join(selected_dir, file_name + '_%.2f.h5'%best_acc))
-        with open(os.path.join(selected_dir, file_name + '_%.2f.json'%best_acc), "w") as json_file:
+        # model.save_weights(os.path.join(selected_dir, file_name + '_%.2f.h5'%best_acc))
+        # look for the model weights with best acc and copy it
+        files = glob.glob(model_dir+file_name+'*.h5')
+        files.sort()
+        best_model_dir = files[-1]
+        selected_model_dir = best_model_dir.replace(model_dir, selected_dir)
+        selected_json_dir = selected_model_dir.replace('.h5', '.json')
+        copyfile(best_model_dir, selected_model_dir)
+        with open(os.path.join(selected_json_dir), "w") as json_file:
             json_file.write(model_json)
 
 def load_model(file_name):
@@ -101,11 +111,14 @@ for voxelise_i in [1]:
             logger.info("repeating {0}".format(repeat_i))
             x, y = shuffle(x, y)
             train_x, train_y, test_x, test_y = split_data(x, y)
-            for model_i in [4]: # we select model 3
+            for model_i in [4]: # we select model 4
                 model_name = model_names[model_i]
                 model = get_model(model_i)
-                file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d' % (
+                file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d,train_ratio=0.8' % (
                      size, step, epochs, scale, model_name, voxelise_i, repeat_i)+',retrain=%d'
+                checkpoint = ModelCheckpoint(model_dir+file_name%0+'_{epoch:02d}-loss={val_loss:.2f}-acc={val_acc:.2f}.h5', monitor='val_loss',
+                                             verbose=2, save_best_only=True, save_weights_only=True, mode='auto',
+                                             period=1)
                 logger.info("*************** start training ****************")
                 logger.info("model is {0}".format(model_name))
                 logger.info("box size is {0}".format(size))
@@ -120,8 +133,8 @@ for voxelise_i in [1]:
                 print (model.summary())
 
                 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-                h = model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
-                              validation_data=(test_x, test_y), callbacks=[earlystopper])
+                h = model.fit(batch_size=32, x=x, y=y, epochs=epochs, verbose=2,
+                              validation_split=0.2, callbacks=[earlystopper,checkpoint])
                 save_model_info(file_name%0, model, h)
                 for repeat_count in range(1, n_retrain+1):
                     train_x, train_y = shuffle(train_x, train_y)
@@ -132,7 +145,7 @@ for voxelise_i in [1]:
 
                     logger.info('retraining...')
                     h = loaded_model.fit(batch_size=32, x=train_x, y=train_y, epochs=epochs, verbose=2,
-                                         validation_data=(test_x, test_y), callbacks=[earlystopper])
+                                         validation_data=(test_x, test_y), callbacks=[earlystopper, checkpoint])
                     save_model_info(file_name % repeat_count, loaded_model, h)
 
                 logger.info("*************** end training ****************")
