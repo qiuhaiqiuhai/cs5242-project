@@ -16,7 +16,7 @@ __gcloud init --zone us-east1-c__
 __gcloud compute instances list__  
 
 -> connect to ssh  
-__gcloud compute ssh cs5242__  
+__gcloud compute ssh xiaogouman@cs5242__  
 
 2. upload/download file  
 -> go to the local directory with the data to upload  
