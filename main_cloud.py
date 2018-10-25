@@ -1,4 +1,4 @@
-from models import trial_3Dcnn, test1_3Dcnn, test2_3Dcnn, test3_3Dcnn, test4_3Dcnn
+from models import trial_3Dcnn, test1_3Dcnn, test2_3Dcnn, test3_3Dcnn, test4_3Dcnn, test5_3Dcnn
 from keras import optimizers, losses
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import load_model, model_from_json
@@ -31,29 +31,11 @@ model_dir = 'models/%s/'%folder_name
 if not os.path.exists(model_dir):
     os.makedirs(model_dir)
 
-size = CONST.VOXEL.size
-step = CONST.VOXEL.step
-epochs = 10
-input_shape = (size, size, size, 4)
-processed_amount = CONST.DATA.processed_amount
-n_bind = 10000
-n_retrain = 0 # retrain how many times. If no need to retrain, put 0
+
 selected_acc = 0.96
-n_repeat = 1
 
 
-# define models
-model_names = ['test0', 'test1', 'test2', 'test3', 'test4']
-models = []
-models.append(trial_3Dcnn(input_shape=input_shape))
-models.append(test1_3Dcnn(input_shape=input_shape))
-models.append(test2_3Dcnn(input_shape=input_shape))
-models.append(test3_3Dcnn(input_shape=input_shape))
-models.append(test4_3Dcnn(input_shape=input_shape))
-optimizer = optimizers.adadelta()
-earlystopper = EarlyStopping(patience=2, verbose=2, monitor='val_loss')
-
-def get_model(index):
+def get_model(index, input_shape):
     if index == 0:
         return trial_3Dcnn(input_shape=input_shape)
     if index == 1:
@@ -64,6 +46,8 @@ def get_model(index):
         return test3_3Dcnn(input_shape=input_shape)
     if index == 4:
         return test4_3Dcnn(input_shape=input_shape)
+    if index == 5:
+        return test5_3Dcnn(input_shape=input_shape)
 
 def save_model_info(file_name, model, h):
     logger.info('save model weights in {0}...'.format(model_dir+file_name))
@@ -102,29 +86,50 @@ def split_data(x, y, split=0.2):
     n_train = math.floor(len(x)*(1-split))
     return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
-for voxelise_i in [1]:
-    logger.info("using voxelise_{0}".format(voxelise_i))
-    for scale in [1]: # unbind:bind scale
-        n_unbind = math.floor(n_bind * scale)
-        x, y, class_name = read_processed_data(bind_count=n_bind, unbind_count=n_unbind, voxelise_i=voxelise_i)
-        for repeat_i in range(n_repeat):
-            logger.info("repeating {0}".format(repeat_i))
-            x, y = shuffle(x, y)
-            train_x, train_y, test_x, test_y = split_data(x, y)
-            for model_i in [4]: # we select model 4
+
+size = 25
+steps = [1, 1.5]
+epochs = 1
+input_shape = (size, size, size, 4)
+n_bind = 10500
+n_retrain = 0 # retrain how many times. If no need to retrain, put 0
+n_repeat = 1
+data_dir = '../preprocessed_data/training_size%d_step%.1f/voxelise_%d/'
+
+
+# define models
+model_names = ['test0', 'test1', 'test2', 'test3', 'test4', 'test5']
+optimizer = optimizers.adadelta()
+earlystopper = EarlyStopping(patience=2, verbose=2, monitor='val_loss')
+
+
+
+for step in steps:
+    for voxelise_i in [1]:
+        logger.info("using voxelise_{0}".format(voxelise_i))
+        for scale in [1]: # unbind:bind scale
+            n_unbind = math.floor(n_bind * scale)
+            x, y, class_name = read_processed_data(bind_count=n_bind, unbind_count=n_unbind, directory=data_dir%(size,step,voxelise_i))
+            for repeat_i in range(n_repeat):
+                logger.info("repeating {0}".format(repeat_i))
+                x, y = shuffle(x, y)
+                train_x, train_y, test_x, test_y = split_data(x, y)
+                if step == 1:
+                    model_i = 5 # use dilation for each conv layer
+                else:
+                    model_i = 4 # no dilation
                 model_name = model_names[model_i]
-                model = get_model(model_i)
-                file_name = 'box_size=%d,step=%d,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d,train_ratio=0.8' % (
+                model = get_model(model_i, input_shape=input_shape)
+                file_name = 'box_size=%d,step=%.1f,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d,train_ratio=0.8' % (
                      size, step, epochs, scale, model_name, voxelise_i, repeat_i)+',retrain=%d'
                 checkpoint = ModelCheckpoint(model_dir+file_name%0+'_{epoch:02d}-loss={val_loss:.2f}-acc={val_acc:.2f}.h5', monitor='val_loss',
                                              verbose=2, save_best_only=True, save_weights_only=True, mode='auto',
                                              period=1)
                 logger.info("*************** start training ****************")
                 logger.info("model is {0}".format(model_name))
-                logger.info("box size is {0}".format(size))
+                logger.info("number of steps is {0}".format(size))
                 logger.info("step is {0}".format(step))
                 logger.info("epochs is {0}".format(epochs))
-                logger.info("process from index {0} to {1}".format(1, processed_amount))
                 logger.info("unbind:bind scale is {0}:1".format(scale))
                 logger.info("training {0} bind data".format(n_bind))
                 logger.info("training {0} unbind data".format(n_unbind))

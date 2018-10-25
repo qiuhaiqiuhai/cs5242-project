@@ -22,4 +22,6 @@ class DIR:
     training_base = '../preprocessed_data/training/voxelise_%d/'
     training_bind_data = '../preprocessed_data/training/voxelise_%d/bind_data'
     training_unbind_data = '../preprocessed_data/training/voxelise_%d/unbind_data_%02d'
+    unbind_filename = 'unbind_data_%02d'
+    bind_filename = 'bind_data'
 

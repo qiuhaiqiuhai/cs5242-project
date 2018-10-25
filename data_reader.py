@@ -8,14 +8,15 @@ import CONST
 from sklearn.utils import shuffle
 import pickle
 import plot3D
+import os
 
 
-def read_processed_data(bind_count = None, unbind_count = None, shuffled = True, voxelise_i = 1):
+def read_processed_data(bind_count = None, unbind_count = None, shuffled = True, directory=CONST.DIR.preprocess_base):
     train_x = [] ; train_y = []
     class_name = ['bind', 'unbind']
 
     # bind_data_origin = np.load(CONST.DIR.bind_data%voxelise_i + '.npy', mmap_mode='r')
-    bind_data_origin = np.load(CONST.DIR.training_bind_data%voxelise_i + '.npy', mmap_mode='r')
+    bind_data_origin = np.load(os.path.join(directory, CONST.DIR.bind_filename+'.npy'), mmap_mode='r')
 
     if(shuffled):
         bind_data_origin = shuffle(bind_data_origin)
@@ -27,8 +28,8 @@ def read_processed_data(bind_count = None, unbind_count = None, shuffled = True,
         # unbind_data_sub = np.load(CONST.DIR.unbind_data% (voxelise_i, i + 1) + '.npy')
         # print(CONST.DIR.unbind_data% (voxelise_i, i + 1) + ' total:' + str(unbind_data_sub.shape[0]) )
 
-        unbind_data_sub = np.load(CONST.DIR.training_unbind_data% (voxelise_i, i + 1) + '.npy')
-        print(CONST.DIR.training_unbind_data% (voxelise_i, i + 1) + ' total:' + str(unbind_data_sub.shape[0]) )
+        unbind_data_sub = np.load(os.path.join(directory, CONST.DIR.unbind_filename% (i + 1) + '.npy'))
+        print(CONST.DIR.unbind_filename% (i + 1) + ' total:' + str(unbind_data_sub.shape[0]) )
         if(unbind_data_origin is None):
             unbind_data_origin = unbind_data_sub
         else:
