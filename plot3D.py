@@ -50,11 +50,15 @@ def plot_voxel(voxel):
 
     plt.show()
 
-
-
-pro = readpdb.read_pdb_test(1, 'pro')
-lig = readpdb.read_pdb_test(365, 'lig')
-plot_atoms(pro, lig)
+if __name__ == "__main__":
+    import sys
+    if sys.argv[1] == 'train':
+        pro = readpdb.read_pdb(int(sys.argv[2]), 'pro')
+        lig = readpdb.read_pdb(int(sys.argv[3]), 'lig')
+    elif sys.argv[1] == 'test':
+        pro = readpdb.read_pdb_test(int(sys.argv[2]), 'pro')
+        lig = readpdb.read_pdb_test(int(sys.argv[3]), 'lig')
+    plot_atoms(pro, lig)
 
 # voxel = np.load('../preprocessed_data/bind_data.npy')[0]
 # plot_voxel(voxel)

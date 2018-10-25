@@ -8,11 +8,6 @@ import pickle
 import os
 import plot3D
 
-if not os.path.exists('../test_result/'):
-    os.makedirs('../test_result/')
-
-np.set_printoptions(precision=3, suppress=True)
-
 def build_model():
     with open('selected_models/box_size=19,step=1,epochs=10,unbind=1,model=test4,voxelise=1,repeat=0,retrain=0_0.97.json', 'r') as f:
         model = model_from_json(f.read())
@@ -35,24 +30,36 @@ def calc_res(pro_id):
     pickle.dump(predicts, open("../test_result/result_%04d.p"%pro_id, "wb"))
     return predicts
 
-pro_id = 3
-# predicts = calc_res(pro_id)
-predicts = pickle.load(open("../test_result/result_%04d.p"%pro_id, "rb"))
-# mean
-predicts.sort(key=lambda x: np.mean(x[1][:,0]), reverse=True)
-lig_label = []
-limit = 10
-for i in range(limit):
-    print('lig_%03d'%predicts[i][0], predicts[i][1][:,0])
-    lig_label.append('lig_%03d'%predicts[i][0])
-    # print('lig_%d' % predicts[i][0], end=' ')
-# max
-# print()
-print('*'*30)
-predicts.sort(key=lambda x: np.min(x[1][:,0]), reverse=True)
-for i in range(limit):
-    print('lig_%03d'%predicts[i][0], predicts[i][1][:,0])
-    lig_label.append('lig_%03d' % predicts[i][0])
+if __name__ == "__main__":
+    import sys
+    if not os.path.exists('../test_result/'):
+        os.makedirs('../test_result/')
+    np.set_printoptions(precision=3, suppress=True)
+    pro_id = int(sys.argv[1])
+    # predicts = calc_res(pro_id)
+    predicts = pickle.load(open("../test_result/result_%04d.p"%pro_id, "rb"))
+    # mean
+    predicts.sort(key=lambda x: np.mean(x[1][:,0]), reverse=True)
+    lig_label = []
+    limit = 10
+    for i in range(limit):
+        print('lig_%03d'%predicts[i][0], predicts[i][1][:,0])
+        lig_label.append('lig_%03d'%predicts[i][0])
+        # print('lig_%d' % predicts[i][0], end=' ')
+    # # max
+    # # print()
+    # print('*'*30)
+    # predicts.sort(key=lambda x: np.min(x[1][:,0]), reverse=True)
+    # for i in range(limit):
+    #     print('lig_%03d'%predicts[i][0], predicts[i][1][:,0])
+    #     lig_label.append('lig_%03d' % predicts[i][0])
 
-print(np.reshape(lig_label,(2, limit)).transpose())
+    # mean square
+    print('*'*30)
+    predicts.sort(key=lambda x: np.mean(x[1][:,0]**2), reverse=True)
+    for i in range(limit):
+        print('lig_%03d'%predicts[i][0], predicts[i][1][:,0])
+        lig_label.append('lig_%03d' % predicts[i][0])
+
+    print(np.reshape(lig_label,(2, limit)).transpose())
 
