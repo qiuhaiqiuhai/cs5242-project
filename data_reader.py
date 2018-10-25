@@ -49,4 +49,6 @@ def read_processed_test(pro_id):
     voxels_list = pickle.load(open(CONST.DIR.preprocess_test+'%04d_pro.p'%pro_id, "rb"))
     return voxels_list
 
-# read_processed_data()
+def read_processed_training_test(pro_id):
+    voxels_list = pickle.load(open('../preprocessed_training_test/'+'%04d_pro.p'%pro_id, "rb"))
+    return voxels_list
