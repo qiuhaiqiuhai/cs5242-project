@@ -13,9 +13,6 @@ test_indexes = np.loadtxt('testing_indexes.txt')
 n = 10
 
 
-if not os.path.exists(result_dir):
-    os.makedirs(result_dir)
-
 def build_model(file_name):
     json_file = open(file_name+'.json', 'r')
     loaded_model_json = json_file.read()
@@ -140,6 +137,8 @@ if __name__ == '__main__':
     date = datetime.datetime
     folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
     result_dir = '../training_test_result/' + folder_name + '/'
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
 
     size = 25
     step = 1.5
