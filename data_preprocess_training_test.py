@@ -2,20 +2,21 @@ import numpy as np
 import CONST
 import os
 import time
-import plot3D
 import pickle
 from readpdb_example import read_pdb
 from data_preprocess import fill_voxel, voxelise_1, prebind
 
 
 if __name__ == "__main__":
-    test_dir = '../preprocessed_training_test/'
+    size = 25
+    step = 1.5
+    test_dir = '../preprocessed_training_test/size%d_step%.1f/'%(size, step)
     if not os.path.exists(test_dir):
         os.makedirs(test_dir)
     test_indexes = np.loadtxt('testing_indexes.txt')
 
     count = 0
-    for pro_i in [881, 34]:
+    for pro_i in test_indexes:
         pro = read_pdb(pro_i, 'pro')
         voxel_list = []
         for lig_i in test_indexes:
