@@ -8,9 +8,11 @@ import os
 import plot3D
 
 
-test_indexes = np.loadtxt('testing_indexes.txt')
+
 
 n = 10
+
+print_n = 20
 
 
 def build_model(file_name):
@@ -27,7 +29,7 @@ def predict(predicts):
     lig_min_indexes = []
     lig_mean_square_indexes = []
     limit = min(n, len(predicts))
-    print_limit = min(20, len(predicts))
+    print_limit = min(print_n, len(predicts))
 
     print ("mean prediction")
     predicts.sort(key=lambda x: np.mean(x[1][:, 0]), reverse=True)
@@ -65,8 +67,12 @@ def predict(predicts):
     return lig_mean_indexes, lig_min_indexes, lig_mean_square_indexes
 
 def save_prediction_result(indexes, model_filename, test_data_dir, result_dir):
+    print ('save prediction result for %s'%model_filename)
     model = build_model(model_filename)
     for pro_i in indexes:
+        if os.path.isfile(result_dir+'result_%04d.p'%pro_i):
+            print ("skip saving result for {0} since it exists".format(pro_i))
+            continue
         print ("saving result for {0}".format(pro_i))
         voxels_list = read_processed_training_test(pro_id=pro_i, directory=test_data_dir)
         predicts = []
@@ -77,7 +83,7 @@ def save_prediction_result(indexes, model_filename, test_data_dir, result_dir):
             predicts.append((voxels_list[i][0],predict_y))
         pickle.dump(predicts, open(result_dir+"result_%04d.p" % pro_i, "wb"))
 
-def predict_results(result_dir):
+def predict_results(indexes, result_dir):
 
     mean_results = []
     min_results = []
@@ -85,12 +91,12 @@ def predict_results(result_dir):
     mean_count = 0
     min_count = 0
     mean_square_count = 0
-    for pro_i in test_indexes:
+    for pro_i in indexes:
         print("********************* predicting on index {0} ***********************".format(pro_i))
         predicts = pickle.load(open(result_dir+"result_%04d.p" % pro_i, "rb"))
         print('total ligand counts: {0}'.format(len(predicts)))
         lig_mean_indexes, lig_min_indexes, lig_mean_square_indexes = predict(predicts)
-        # print('*** mean ***' )
+        #print('*** mean ***' )
         if pro_i in lig_mean_indexes:
             #print('Got it!')
             mean_count += 1;
@@ -100,7 +106,6 @@ def predict_results(result_dir):
             print('pro_%04d' % pro_i, lig_mean_indexes)
         labels = ['pro_%04d'%pro_i]
         mean_results.append(np.append(labels, ['lig_%04d' % index for index in lig_mean_indexes]))
-        print (mean_results)
         #print('*** min ***' )
         #print('pro_%04d' % pro_i, lig_min_indexes)
         if pro_i in lig_min_indexes:
@@ -124,9 +129,9 @@ def predict_results(result_dir):
         labels = ['pro_%04d'%pro_i]
         mean_square_results.append(np.append(labels,['lig_%04d'%index for index in lig_mean_square_indexes]))
 
-    print ('using mean: conversion rate for top 10 predictions: {0}'.format(mean_count/len(test_indexes)))
-    print ('using min: conversion rate for top 10 predictions: {0}'.format(min_count/len(test_indexes)))
-    print ('using mean square: conversion rate for top 10 predictions: {0}'.format(mean_square_count/len(test_indexes)))
+    print ('using mean: conversion rate for top 10 predictions: {0}'.format(mean_count/len(indexes)))
+    print ('using min: conversion rate for top 10 predictions: {0}'.format(min_count/len(indexes)))
+    print ('using mean square: conversion rate for top 10 predictions: {0}'.format(mean_square_count/len(indexes)))
 
     np.savetxt(result_dir+'training_test_result_using_mean.txt', mean_results, fmt="%s")
     np.savetxt(result_dir+'training_test_result_using_min.txt', min_results, fmt='%s')
@@ -134,17 +139,28 @@ def predict_results(result_dir):
 
 
 if __name__ == '__main__':
-    date = datetime.datetime
-    folder_name = date.today().strftime('%Y-%m-%d_%H_%M_%S')
-    result_dir = '../training_test_result/' + folder_name + '/'
+        
+    test_indexes = np.loadtxt('testing_indexes.txt')
+
+    model_19_1_unbind1 = 'box_size=19,step=1,epochs=10,unbind=1,model=test4,voxelise=1,repeat=0,' \
+                'train_ratio=0.8,retrain=0_07-loss=0.10-acc=0.97'
+    model_19_1_unbind2 = 'box_size=19,step=1.0,epochs=10,unbind=2,model=test4,voxelise=1,repeat=0,' \
+                'train_ratio=0.8,retrain=0_06-loss=0.09-acc=0.97'
+    model_25_15_unbind1 = 'box_size=25,step=1.5,epochs=10,unbind=1,model=test4,voxelise=1,repeat=0,' \
+                'train_ratio=0.8,retrain=0_06-loss=0.08-acc=0.97'
+    model_25_15_unbind2 = 'box_size=25,step=1.5,epochs=10,unbind=2,model=test4,voxelise=1,repeat=0,' \
+                'train_ratio=0.8,retrain=0_05-loss=0.07-acc=0.98'
+    model_25_15_unbind3 = 'box_size=25,step=1.5,epochs=10,unbind=3,model=test4,voxelise=1,repeat=0,' \
+                'train_ratio=0.8,retrain=0_07-loss=0.07-acc=0.98'
+    
+    model_file_name = model_19_1_unbind1
+    size = 19
+    step = 1
+    test_data_dir = '../preprocessed_training_test/size%d_step%.1f/' % (size, step)
+
+    result_dir = '../training_test_result/' + model_file_name + '/'
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
-
-    size = 25
-    step = 1.5
-    test_data_dir = '../preprocessed_training_test/size%d_step%.1f/' % (size, step)
-    model_file_name = 'selected_models/box_size=19,step=1,epochs=10,unbind=1,model=test4,voxelise=1,repeat=0,' \
-                'train_ratio=0.8,retrain=0_07-loss=0.10-acc=0.97'
-
-    save_prediction_result(test_indexes, model_file_name, test_data_dir, result_dir)
-    predict_results(result_dir)
+    print (model_file_name)
+    save_prediction_result(test_indexes, 'selected_models/'+model_file_name, test_data_dir, result_dir)
+    predict_results(test_indexes, result_dir)

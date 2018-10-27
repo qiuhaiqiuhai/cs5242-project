@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     training_indexes = np.loadtxt('training_indexes.txt')
     size = 25
-    steps = [1, 1.5]
+    steps = [1.5]
 
 
     voxelises = [None, voxelise_1, voxelise_2, voxelise_3]
@@ -241,12 +241,12 @@ if __name__ == "__main__":
             if not os.path.exists(training_dir%voxelise_i):
                 os.makedirs(training_dir%voxelise_i)
 
-            for data_index in training_indexes[:10]:
-                bind_data.extend(data_preprocess_bind(data_index, size=size, step=step))
+            for data_index in training_indexes:
+                #bind_data.extend(data_preprocess_bind(data_index, size=size, step=step))
                 unbind_data.extend(data_preprocess_unbind(data_index, size=size, step=step))
 
-            print("bind data: " + str(len(bind_data)))
-            np.save(bind_dir%voxelise_i, bind_data)
+            #print("bind data: " + str(len(bind_data)))
+            #np.save(bind_dir%voxelise_i, bind_data)
             print("unbind data: " + str(len(unbind_data)))
             data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
             for i in range(CONST.DATA.unbind_count):

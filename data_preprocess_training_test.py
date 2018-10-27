@@ -16,7 +16,9 @@ if __name__ == "__main__":
     test_indexes = np.loadtxt('testing_indexes.txt')
 
     count = 0
-    for pro_i in test_indexes:
+    for pro_i in text_indexes:
+        if os.path.isfile(test_dir+'%04d_pro.p'%pro_i):
+            continue
         pro = read_pdb(pro_i, 'pro')
         voxel_list = []
         for lig_i in test_indexes:
@@ -26,9 +28,9 @@ if __name__ == "__main__":
                 continue
             voxels = []
             for lig_atom in range(len(lig['x'])):
-                pre_voxel, neighbor_count = fill_voxel(pro, lig, lig_atom)
+                pre_voxel, neighbor_count = fill_voxel(pro, lig, lig_atom, size=size, step=step)
                 print('pro: %d, lig: %d, lig_atom: %d, atom count: %d'%(pro_i, lig_i, lig_atom, neighbor_count))
-                voxels.append(voxelise_1(pre_voxel))
+                voxels.append(voxelise_1(pre_voxel,size=size,step=step))
             voxel_list.append((lig_i, voxels))
         count += 1
         pickle.dump(voxel_list, open(test_dir+'%04d_pro.p'%pro_i, "wb"))

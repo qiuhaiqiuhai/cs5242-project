@@ -1,6 +1,6 @@
 import numpy as np
 
-dir_test_data = '../testing_data_release/testing_data/%04d_%s_cg.pdb'
+dir_test_data = '../testing_data/%04d_%s_cg.pdb'
 
 def read_pdb_test(index, type='lig'):
     filename = dir_test_data%(index, type)

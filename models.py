@@ -198,6 +198,22 @@ def test5_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
 
     return model
 
+def test6_3Dcnn(input_shape=(20, 20, 20, 4), class_num=2):
+    model = Sequential()
+    model.add(Conv3D(64, input_shape=input_shape,kernel_size=(5, 5, 5), activation='relu', padding="same", strides=(2,2,2)))
+    model.add(Conv3D(128, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Conv3D(256, kernel_size=(3, 3, 3), activation='relu', padding="same"))
+    model.add(MaxPool3D(pool_size=(2, 2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(class_num, activation='softmax'))
+
+    return model
+
 
 if __name__ == '__main__':
     # 8,219,330 params
