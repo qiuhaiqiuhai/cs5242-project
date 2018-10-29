@@ -5,14 +5,20 @@ import numpy as np
 import CONST
 import readpdb_example as readpdb
 
+
 def plot_atoms(pro, lig):
+    """
+    draw protein and ligand in same 3D graph
+    :param pro: protein
+    :param lig: ligand
+    :return:
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
     for ch, cp, ca, molecule in [('m', 'g', 0.5, pro), ('r', 'b', 1.0, lig)]:
         h_list = [i for i, x in enumerate(molecule['type']) if x == "h"]
         p_list = [i for i, x in enumerate(molecule['type']) if x == "p"]
-
 
         for c, m, mors in [(ch, 'o', h_list), (cp, '^', p_list)]:
             xs = [molecule['x'][i] for i in mors]
@@ -25,6 +31,7 @@ def plot_atoms(pro, lig):
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
     plt.show()
+
 
 def plot_voxel(voxel):
     # prepare some coordinates, and attach rgb values to each
@@ -50,6 +57,7 @@ def plot_voxel(voxel):
 
     plt.show()
 
+
 if __name__ == "__main__":
     import sys
     if sys.argv[1] == 'train':
@@ -59,6 +67,3 @@ if __name__ == "__main__":
         pro = readpdb.read_pdb_test(int(sys.argv[2]), 'pro')
         lig = readpdb.read_pdb_test(int(sys.argv[3]), 'lig')
     plot_atoms(pro, lig)
-
-# voxel = np.load('../preprocessed_data/bind_data.npy')[0]
-# plot_voxel(voxel)

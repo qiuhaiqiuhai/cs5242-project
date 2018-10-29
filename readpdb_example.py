@@ -1,9 +1,9 @@
-import numpy as np
+import CONST
 
-dir_test_data = '../testing_data/%04d_%s_cg.pdb'
 
 def read_pdb_test(index, type='lig'):
-    filename = dir_test_data%(index, type)
+
+    filename = CONST.DIR.testing_data + gen_file_name(index, type)
     with open(filename, 'r') as file:
         strline_L = file.readlines()
 
@@ -25,12 +25,18 @@ def read_pdb_test(index, type='lig'):
 			'z':Z_list,
 			'type':atomtype_list}
 
+
 def read_pdb(index, type="lig"):
-	filename = gen_file_name(index, type)
+	"""
+	read training pdb file
+	:param index: index of protein or ligand
+	:param type: 'lig' or 'pro'
+	:return: json object with x, y, z and type list
+	"""
+	filename = CONST.DIR.training_data + gen_file_name(index, type)
 
 	with open(filename, 'r') as file:
 		strline_L = file.readlines()
-		# print(strline_L)
 
 	X_list = list()
 	Y_list = list()
@@ -55,10 +61,9 @@ def read_pdb(index, type="lig"):
 			'z':Z_list,
 			'type':atomtype_list}
 
-folder_path = "../training_data/"
 
 def gen_file_name(index, type="lig"):
-	return folder_path+"%04d_%s_cg.pdb"%(index, type)
+	return "%04d_%s_cg.pdb"%(index, type)
 
 
 
