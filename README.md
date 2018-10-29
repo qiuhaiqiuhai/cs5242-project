@@ -13,6 +13,6 @@
     >run __data_preprocess_test.py__ <br>
     this step will produce large data files and take long time
 4. Get 10 predictions for each protein
-    > run test_prediction.py <br>
-    this step will run about 
+    > run __test_prediction.py__ <br>
+    this step will take long time and produce the test_predictions.txt result file
 
