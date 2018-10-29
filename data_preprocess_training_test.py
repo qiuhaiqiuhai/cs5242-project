@@ -16,7 +16,7 @@ if __name__ == "__main__":
     test_indexes = np.loadtxt('testing_indexes.txt')
 
     count = 0
-    for pro_i in text_indexes:
+    for pro_i in test_indexes:
         if os.path.isfile(test_dir+'%04d_pro.p'%pro_i):
             continue
         pro = read_pdb(pro_i, 'pro')
