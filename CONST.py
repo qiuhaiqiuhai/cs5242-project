@@ -5,9 +5,9 @@ class VOXEL:
 
 
 class DATA:
-    test_total = 8
+    test_total = 824
     unbind_count = 2 # For one ligand atom, there are how many unbind processed data
-    processed_amount = 10
+    processed_amount = 3000
 
 
 class LIMIT:
