@@ -228,5 +228,3 @@ if __name__ == '__main__':
             line[i] = '%d'%result[i]
         prediction_txt.append(line)
     np.savetxt('test_predictions.txt', prediction_txt, fmt='%s', delimiter='\t')
-
-

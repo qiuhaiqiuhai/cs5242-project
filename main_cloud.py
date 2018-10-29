@@ -89,14 +89,14 @@ def split_data(x, y, split=0.2):
     return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
 
-size = 25
+size = 19
 steps = [1.5]
 epochs = 10
 input_shape = (size, size, size, 4)
-n_bind = 10500
+n_bind = 13770
 n_retrain = 0 # retrain how many times. If no need to retrain, put 0
-n_repeat = 1
-data_dir = '../preprocessed_data/training_size%d_step%.1f/voxelise_%d/'
+n_repeat = 3
+data_dir = '../preprocessed_data/all_training_size%d_step%.1f/voxelise_%d/'
 #data_dir = '../preprocessed_data/training/voxelise_%d/'
 
 # define models
@@ -109,8 +109,9 @@ earlystopper = EarlyStopping(patience=2, verbose=2, monitor='val_loss')
 for step in steps:
     for voxelise_i in [1]:
         logger.info("using voxelise_{0}".format(voxelise_i))
-        for scale in [4]: # unbind:bind scale
-            n_unbind = math.floor(n_bind * scale)
+        for scale in [2]: # unbind:bind scale
+            #n_unbind = math.floor(n_bind * scale)
+            n_unbind = 27226
             x, y, class_name = read_processed_data(bind_count=n_bind, unbind_count=n_unbind, directory=data_dir%(size,step, voxelise_i))
             for repeat_i in range(n_repeat):
                 logger.info("repeating {0}".format(repeat_i))
@@ -122,9 +123,9 @@ for step in steps:
                 model_i = 4 # no dilation
                 model_name = model_names[model_i]
                 model = get_model(model_i, input_shape=input_shape)
-                file_name = 'box_size=%d,step=%.1f,epochs=%d,unbind=%d,model=%s,voxelise=%d,repeat=%d,train_ratio=0.8' % (
+                file_name = 'box_size=%d,step=%.1f,epochs=%d,unbind=%.1f,model=%s,voxelise=%d,repeat=%d' % (
                      size, step, epochs, scale, model_name, voxelise_i, repeat_i)+',retrain=%d'
-                checkpoint = ModelCheckpoint(model_dir+file_name%0+'_{epoch:02d}-loss={val_loss:.2f}-acc={val_acc:.2f}.h5', monitor='val_loss',
+                checkpoint = ModelCheckpoint(model_dir+file_name%0+'_{epoch:02d}-loss={val_loss:.4f}-acc={val_acc:.4f}.h5', monitor='val_loss',
                                              verbose=2, save_best_only=True, save_weights_only=True, mode='auto',
                                              period=1)
                 logger.info("*************** start training ****************")

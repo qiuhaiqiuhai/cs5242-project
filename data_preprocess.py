@@ -197,8 +197,9 @@ if __name__ == "__main__":
     if not os.path.exists(CONST.DIR.preprocess_base):
         os.makedirs(CONST.DIR.preprocess_base)
 
-    training_indexes = np.loadtxt('training_indexes.txt')
-    size = 25
+    #training_indexes = np.loadtxt('training_indexes.txt')
+    training_indexes = range(1, 3001)
+    size = 19
     steps = [1.5]
 
 
@@ -228,7 +229,8 @@ if __name__ == "__main__":
 
     # use only selected training set to train
     for step in steps:
-        training_dir = '../preprocessed_data/training_size%d_step%.1f/'%(size,step)+'voxelise_%d/'
+        #training_dir = '../preprocessed_data/training_size%d_step%.1f/'%(size,step)+'voxelise_%d/'
+        training_dir = '../preprocessed_data/all_training_size%d_step%.1f/'%(size,step)+'voxelise_%d/'
         bind_dir = training_dir+'bind_data'
         unbind_dir = training_dir+'unbind_data_%02d'
         for voxelise_i in [1]:
@@ -242,14 +244,14 @@ if __name__ == "__main__":
                 os.makedirs(training_dir%voxelise_i)
 
             for data_index in training_indexes:
-                #bind_data.extend(data_preprocess_bind(data_index, size=size, step=step))
-                unbind_data.extend(data_preprocess_unbind(data_index, size=size, step=step))
+                bind_data.extend(data_preprocess_bind(data_index, size=size, step=step))
+                unbind_data.extend(data_preprocess_unbind(data_index, unbind_count=2, size=size, step=step))
 
             #print("bind data: " + str(len(bind_data)))
             #np.save(bind_dir%voxelise_i, bind_data)
             print("unbind data: " + str(len(unbind_data)))
-            data_len = 1 + len(unbind_data)//CONST.DATA.unbind_count
-            for i in range(CONST.DATA.unbind_count):
+            data_len = 1 + len(unbind_data)//2
+            for i in range(2):
                 np.save(unbind_dir%(voxelise_i,(i+1)), unbind_data[i*data_len:min((i+1)*data_len, len(unbind_data))])
 
     end = time.time()

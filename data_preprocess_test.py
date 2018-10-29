@@ -13,10 +13,11 @@ from data_preprocess import fill_voxel, voxelise_1, prebind
 
 
 if __name__ == "__main__":
-    if not os.path.exists(CONST.DIR.preprocess_test):
-        os.makedirs(CONST.DIR.preprocess_test)
+    folder = '../preprocessed_test/size19_step1.5/'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     for pro_id in range(1,CONST.DATA.test_total+1):
-        if os.path.isfile(CONST.DIR.preprocess_test+'%04d_pro.p'%pro_id):
+        if os.path.isfile(folder+'%04d_pro.p'%pro_id):
             continue
         pro = read_pdb_test(pro_id, 'pro')
         voxel_list = []
@@ -27,12 +28,12 @@ if __name__ == "__main__":
                 continue
             voxels = []
             for lig_atom in range(len(lig['x'])):
-                pre_voxel, neighbor_count = fill_voxel(pro, lig, lig_atom)
+                pre_voxel, neighbor_count = fill_voxel(pro, lig, lig_atom, size=19,step=1.5)
                 print('pro: %d, lig: %d, lig_atom: %d, atom count: %d'%(pro_id, i+1, lig_atom, neighbor_count))
                 # atom_count.append(neighbor_count)
-                voxels.append(voxelise_1(pre_voxel))
+                voxels.append(voxelise_1(pre_voxel,size=19,step=1.5))
             voxel_list.append((i+1, voxels))
             count+=1
-        pickle.dump(voxel_list, open(CONST.DIR.preprocess_test+'%04d_pro.p'%pro_id, "wb"))
+        pickle.dump(voxel_list, open(folder+'%04d_pro.p'%pro_id, "wb"))
     print(count)
     # plot3D.plot_atoms(pro, lig)

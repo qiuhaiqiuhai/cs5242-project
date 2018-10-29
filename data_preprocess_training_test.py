@@ -8,7 +8,7 @@ from data_preprocess import fill_voxel, voxelise_1, prebind
 
 
 if __name__ == "__main__":
-    size = 25
+    size = 19
     step = 1.5
     test_dir = '../preprocessed_training_test/size%d_step%.1f/'%(size, step)
     if not os.path.exists(test_dir):
