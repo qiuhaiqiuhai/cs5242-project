@@ -1,5 +1,7 @@
 # cs5242-project, Qiu Hai, Zuo Shuman
 
+We have already prepared a model which is used to predict our final test result in 'selected_models' folder, named with 'box_size=19,step=1.5,epochs=10,unbind=2.0,model=test4,voxelise=1,repeat=1,retrain=0_07-loss=0.0630-acc=0.9780.', so you can skip step 1 and 2
+
 0. Add training data and testing data and modify __CONST.py__ to specify 'training_data' and 'testing_data' directories
 1. Preprocess data for training
     > run __data_preprocess.py__
