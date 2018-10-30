@@ -33,6 +33,12 @@ if not os.path.exists(model_dir):
 
 
 def get_model(index, input_shape):
+    """
+    return the ith model
+    :param index:
+    :param input_shape:
+    :return:
+    """
     if index == 0:
         return trial_3Dcnn(input_shape=input_shape)
     if index == 1:
@@ -50,6 +56,13 @@ def get_model(index, input_shape):
 
 
 def save_model_info(file_name, model, h):
+    """
+    save model info in 'models/' folder
+    :param file_name:
+    :param model:
+    :param h: history
+    :return:
+    """
     logger.info('save model weights in {0}...'.format(model_dir+file_name))
     model_json = model.to_json()
     with open(os.path.join(model_dir, file_name+'.json'), "w") as json_file:
@@ -61,6 +74,11 @@ def save_model_info(file_name, model, h):
 
 
 def load_model(file_name):
+    """
+    load model by file name
+    :param file_name:
+    :return: the model
+    """
     logger.info('load model in {0}...'.format(model_dir + file_name))
     with open(os.path.join(model_dir, file_name + '.json'), 'r') as f:
         json = f.read()
@@ -68,10 +86,6 @@ def load_model(file_name):
     loaded_model.load_weights(os.path.join(model_dir, file_name + '.h5'))
     return loaded_model
 
-
-def split_data(x, y, split=0.2):
-    n_train = math.floor(len(x)*(1-split))
-    return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
 
 if __name__ == '__main__':
