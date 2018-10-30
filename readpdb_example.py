@@ -1,8 +1,7 @@
 import CONST
 
-
+# read testing data
 def read_pdb_test(index, type='lig'):
-
     filename = CONST.DIR.testing_data + gen_file_name(index, type)
     with open(filename, 'r') as file:
         strline_L = file.readlines()

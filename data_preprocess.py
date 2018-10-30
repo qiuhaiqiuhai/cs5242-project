@@ -7,6 +7,12 @@ import time
 
 
 def data_preprocess_bind(data_index, size=CONST.VOXEL.size, step=CONST.VOXEL.step):
+    """
+    :param data_index: index of protein & ligand
+    :param size: input shape
+    :param step: voxel size
+    :return: all voxels of matching protein-ligand pair
+    """
     voxels = []
     pro = readpdb.read_pdb(data_index, 'pro')
     lig = readpdb.read_pdb(data_index, 'lig')
@@ -19,13 +25,19 @@ def data_preprocess_bind(data_index, size=CONST.VOXEL.size, step=CONST.VOXEL.ste
 
 
 def data_preprocess_unbind(data_index, unbind_count = CONST.DATA.unbind_count, size=CONST.VOXEL.size, step=CONST.VOXEL.step):
-
+    """
+    :param data_index: index of ligand
+    :param unbind_count: unbind:bind scale
+    :param size: input shape
+    :param step: voxel size
+    :return: voxel list of unbind data
+    """
     lig = readpdb.read_pdb(data_index, 'lig')
     lig_len = len(lig['x'])
     voxels = []
     count = 0
     # use only selected training set
-    for i in training_indexes:
+    for i in range(1, CONST.DATA.processed_amount+1):
         if i == data_index:
             continue
         pro = readpdb.read_pdb(i, 'pro')
@@ -57,7 +69,7 @@ def prebind(pro, lig, min_dist=CONST.LIMIT.min, max_dist=CONST.LIMIT.max, lig_at
     :param min_dist: minimum distance limit between two atoms in protein and ligand
     :param max_dist: maximum distance limit between two atoms in protein and ligand
     :param lig_atom:
-    :return:
+    :return: False if the protein and ligand are too close or far from each other
     """
     pro_zip = list(zip(pro['x'], pro['y'], pro['z'], pro['type']))
     lig_zip = list(zip(lig['x'], lig['y'], lig['z'], lig['type']))
@@ -79,6 +91,13 @@ def prebind(pro, lig, min_dist=CONST.LIMIT.min, max_dist=CONST.LIMIT.max, lig_at
 
 
 def voxelise_1(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+    """
+    first voxelisation method
+    :param pre_voxel: voxel of atoms before mapping to grid point
+    :param size: input shape
+    :param step: voxel size
+    :return: mapped grid
+    """
     voxel = np.zeros((size, size, size, 4))
 
     for atom_recenter in pre_voxel:
@@ -107,6 +126,13 @@ def voxelise_1(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
 
 
 def voxelise_2(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+    """
+    second voxelisation method
+    :param pre_voxel: voxel of atoms before mapping to grid point
+    :param size: input shape
+    :param step: voxel size
+    :return: mapped grid
+    """
     voxel = np.zeros((size, size, size, 4))
 
     for atom_recenter in pre_voxel:
@@ -135,6 +161,13 @@ def voxelise_2(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
 
 
 def voxelise_3(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+    """
+    third voxelisation method
+    :param pre_voxel: voxel of atoms before mapping to grid point
+    :param size: input shape
+    :param step: voxel size
+    :return: mapped grid
+    """
     voxel = np.zeros((size, size, size, 4))
 
     for atom_recenter in pre_voxel:
@@ -150,6 +183,15 @@ def voxelise_3(pre_voxel, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
 
 
 def fill_voxel(pro, lig, lig_atom = 0, size = CONST.VOXEL.size, step = CONST.VOXEL.step):
+    """
+    include all protein and ligand atoms in a voxel centered by a certain ligand atom
+    :param pro: protein
+    :param lig: ligand
+    :param lig_atom: the ith ligand atom
+    :param size: input shape
+    :param step: voxel size
+    :return: the voxel
+    """
     pro_zip = list(zip(pro['x'], pro['y'], pro['z'], pro['type']))
     lig_zip = list(zip(lig['x'], lig['y'], lig['z'], lig['type']))
 
